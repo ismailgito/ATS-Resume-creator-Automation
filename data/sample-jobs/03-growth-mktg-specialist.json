@@ -1,0 +1,38 @@
+{
+  "source": "naukri",
+  "url": "https://www.naukri.com/job-listings-growth-marketing-specialist-fintech-mumbai-2-to-3-years-345678",
+  "title": "Growth Marketing Specialist",
+  "company": "FinScale Technologies",
+  "location": "Mumbai, Maharashtra (Hybrid)",
+  "employment_type": "Full Time",
+  "experience_min": 2,
+  "experience_max": 3,
+  "salary": "INR 10,00,000 - 12,50,000 PA",
+  "description_raw": "FinScale is searching for a Growth Marketing Specialist with 2-3 years experience in paid acquisition, retention marketing, and funnel experimentation. The candidate will run paid ads on Meta and Google, set up event tracking in GTM/GA4, perform cohort analysis, and execute CRO tests on user signup funnels.",
+  "must_have_skills": [
+    "Growth Marketing",
+    "Performance Marketing",
+    "Meta Ads",
+    "Google Ads",
+    "Funnel Analysis",
+    "GA4",
+    "A/B Testing"
+  ],
+  "nice_to_have_skills": [
+    "Klaviyo",
+    "AppsFlyer",
+    "CRO"
+  ],
+  "platforms_and_tools": [
+    "Meta Ads Manager",
+    "Google Ads",
+    "GA4",
+    "GTM",
+    "AppsFlyer"
+  ],
+  "responsibilities": [
+    "Run acquisition experiments across search, social, and referral channels.",
+    "Optimize conversion rates from app install to completed KYC.",
+    "Monitor user cohorts and report CAC and payback periods."
+  ]
+}

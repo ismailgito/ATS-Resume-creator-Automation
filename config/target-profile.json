@@ -1,0 +1,56 @@
+{
+  "target_roles": [
+    "Performance Marketing Manager",
+    "Performance Marketing Specialist",
+    "Digital Marketing Manager",
+    "Digital Marketing Specialist",
+    "Growth Marketing Specialist",
+    "Paid Media Specialist",
+    "PPC Specialist"
+  ],
+  "experience_range": {
+    "min_years": 1.0,
+    "max_years": 4.0,
+    "preferred_years": 2.0
+  },
+  "location_preferences": {
+    "work_modes": [
+      "Remote",
+      "Hybrid",
+      "On-site"
+    ],
+    "preferred_cities": [
+      "Bengaluru",
+      "Bangalore",
+      "Mumbai",
+      "Delhi NCR",
+      "Gurugram",
+      "Noida",
+      "Hyderabad",
+      "Pune"
+    ],
+    "relocation_willing": true
+  },
+  "compensation": {
+    "currency": "INR",
+    "min_annual": 600000,
+    "target_annual": 1000000,
+    "notice_period_days": 30
+  },
+  "key_domains": [
+    "B2B SaaS",
+    "D2C / E-commerce",
+    "B2C Tech",
+    "Fintech",
+    "Edtech"
+  ],
+  "core_channels": [
+    "Google Ads (Search, PMax, Display, YouTube)",
+    "Meta Ads (Facebook, Instagram)",
+    "LinkedIn Ads",
+    "Google Analytics 4 (GA4)",
+    "Google Tag Manager (GTM)",
+    "Conversion Rate Optimization (CRO)",
+    "Attribution Modeling"
+  ]
+}

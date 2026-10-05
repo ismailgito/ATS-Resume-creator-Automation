@@ -1,0 +1,42 @@
+{
+  "candidate_id": "cand-example-001",
+  "full_name": "Full Name",
+  "headline": "Target Role Title | Core Specialization | Measurable Value",
+  "contact": {
+    "email": "candidate@example.com",
+    "phone": "+91 99999 88888",
+    "location": "City, Country",
+    "linkedin": "https://linkedin.com/in/username",
+    "portfolio": "https://portfolio.example.com"
+  },
+  "target_roles": ["Performance Marketing Manager", "Digital Marketing Specialist"],
+  "experience_years": 2.0,
+  "location": "Bengaluru, India",
+  "work_authorization": "Authorized to work full-time",
+  "notice_period_days": 30,
+  "current_ctc_lpa": 6.0,
+  "expected_ctc_lpa": 9.5,
+  "summary_facts": [
+    "Fact 1: Years of experience and primary marketing channels",
+    "Fact 2: Ad budget scale and ROAS achievements",
+    "Fact 3: Measurement tools and tracking expertise"
+  ],
+  "skills": ["Performance Marketing", "Google Ads", "Meta Ads", "GA4", "GTM"],
+  "tools": ["Google Ads", "Meta Ads Manager", "Google Analytics 4", "Google Tag Manager"],
+  "achievements": [
+    {
+      "id": "ach-01",
+      "statement": "Key verified business achievement with metrics",
+      "metric": "X% improvement in Y",
+      "time_period": "2024",
+      "evidence": "Audited dashboard or report link"
+    }
+  ],
+  "employment": [],
+  "education": [],
+  "certifications": [],
+  "links": [],
+  "negative_constraints": [
+    "Do NOT claim skills/tools not verified in this profile"
+  ]
+}

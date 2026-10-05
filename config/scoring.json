@@ -1,0 +1,64 @@
+{
+  "weights": {
+    "title_role_fit": 0.20,
+    "required_skills": 0.25,
+    "platform_tools": 0.15,
+    "experience_fit": 0.15,
+    "industry_fit": 0.10,
+    "location_fit": 0.05,
+    "achievement_relevance": 0.10
+  },
+  "thresholds": {
+    "auto_generate_resume": 80.0,
+    "medium_fit_review": 65.0,
+    "research_queue": 50.0,
+    "rejection_cutoff": 50.0
+  },
+  "synonyms": {
+    "google_ads": [
+      "google ads",
+      "google adwords",
+      "adwords",
+      "sem",
+      "ppc",
+      "search ads",
+      "pmax",
+      "performance max"
+    ],
+    "meta_ads": [
+      "meta ads",
+      "facebook ads",
+      "fb ads",
+      "instagram ads",
+      "ig ads",
+      "paid social"
+    ],
+    "ga4": [
+      "ga4",
+      "google analytics 4",
+      "google analytics",
+      "ga"
+    ],
+    "gtm": [
+      "gtm",
+      "google tag manager",
+      "tag manager"
+    ],
+    "cro": [
+      "cro",
+      "conversion rate optimization",
+      "landing page optimization",
+      "a/b testing"
+    ],
+    "looker_studio": [
+      "looker studio",
+      "google data studio",
+      "data studio",
+      "looker"
+    ],
+    "linkedin_ads": [
+      "linkedin ads",
+      "linkedin campaign manager"
+    ]
+  }
+}

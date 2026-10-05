@@ -1,0 +1,37 @@
+# Target Role Configuration Example
+target_roles:
+  - "Performance Marketing Manager"
+  - "Performance Marketing Specialist"
+  - "Digital Marketing Manager"
+  - "Digital Marketing Specialist"
+  - "Growth Marketing Specialist"
+
+experience_range:
+  min_years: 1.0
+  max_years: 4.0
+  preferred_years: 2.0
+
+location_preferences:
+  work_modes:
+    - "Remote"
+    - "Hybrid"
+  preferred_cities:
+    - "Bengaluru"
+    - "Remote"
+  relocation_willing: true
+
+compensation:
+  currency: "INR"
+  min_annual: 600000
+  target_annual: 1000000
+  notice_period_days: 30
+
+key_domains:
+  - "D2C"
+  - "B2B SaaS"
+
+core_channels:
+  - "Google Ads"
+  - "Meta Ads"
+  - "GA4"
+  - "GTM"

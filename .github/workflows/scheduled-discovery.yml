@@ -1,0 +1,48 @@
+name: Scheduled Discovery & Match Pipeline
+
+on:
+  # Disabled automatic daily execution to prevent auto-generating resumes.
+  # schedule:
+  #   - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      min_score:
+        description: "Minimum match score threshold (0-100)"
+        required: false
+        default: "75"
+
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Process Sample Discovery Queue
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MIN_MATCH_SCORE: ${{ github.event.inputs.min_score || 75 }}
+        run: |
+          python -m src.cli run-sample all
+
+      - name: Generate Pipeline Analytics Summary
+        run: |
+          python -m src.cli report
+
+      - name: Upload Review Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-review-packages
+          path: outputs/
+          retention-days: 14

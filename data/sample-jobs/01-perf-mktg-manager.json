@@ -1,0 +1,39 @@
+{
+  "source": "naukri",
+  "url": "https://www.naukri.com/job-listings-performance-marketing-manager-klarity-bengaluru-2-to-4-years-123456",
+  "title": "Performance Marketing Manager",
+  "company": "GrowthCraft E-Commerce",
+  "location": "Bengaluru, Karnataka (Hybrid)",
+  "employment_type": "Full Time",
+  "experience_min": 2,
+  "experience_max": 4,
+  "salary": "INR 9,00,000 - 13,00,000 PA",
+  "description_raw": "We are looking for an experienced Performance Marketing Manager (2-4 years) to scale paid acquisition channels across Google Ads and Meta Ads for our D2C brands. Responsibilities include managing ad spends up to 20-30L/month, scaling ROAS, setting up GA4/GTM conversion tracking, conducting A/B experiments on ad copies and landing pages, and presenting weekly CAC/ROAS performance metrics. Must have hands-on experience with Google Search, Performance Max, Meta Ads Manager, GA4, and Looker Studio.",
+  "must_have_skills": [
+    "Google Ads",
+    "Meta Ads Manager",
+    "Performance Marketing",
+    "GA4",
+    "GTM",
+    "ROAS Optimization"
+  ],
+  "nice_to_have_skills": [
+    "Looker Studio",
+    "CRO",
+    "Shopify",
+    "A/B Testing"
+  ],
+  "platforms_and_tools": [
+    "Google Ads",
+    "Meta Ads Manager",
+    "Google Analytics 4",
+    "Google Tag Manager",
+    "Looker Studio"
+  ],
+  "responsibilities": [
+    "Scale monthly advertising budget across Google and Meta while hitting ROAS targets.",
+    "Formulate and execute search query expansion, negative keywords, and PMax asset groups.",
+    "Audit and optimize tracking via GA4 events and GTM triggers.",
+    "Coordinate with creative teams to produce high-performing video and static ad angles."
+  ]
+}

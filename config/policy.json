@@ -1,0 +1,47 @@
+{
+  "system": {
+    "mode": "human_in_the_loop",
+    "allow_automated_submission": false,
+    "require_user_review_before_apply": true,
+    "enable_browser_login_bypass": false,
+    "respect_robots_txt": true
+  },
+  "factuality": {
+    "strict_candidate_facts_only": true,
+    "allow_inferred_metrics": false,
+    "require_achievement_evidence": true,
+    "flag_missing_required_skills": true,
+    "reject_on_negative_constraints": true
+  },
+  "ats_formatting": {
+    "max_pages_junior_mid": 1,
+    "max_pages_senior": 2,
+    "allowed_sections": [
+      "Professional Summary",
+      "Core Competencies & Skills",
+      "Professional Experience",
+      "Key Projects & Campaigns",
+      "Education & Certifications"
+    ],
+    "prohibited_elements": [
+      "tables_with_nested_cells",
+      "multi_column_floaters",
+      "text_boxes",
+      "header_footer_contact_info",
+      "non_standard_icons",
+      "graphics_charts"
+    ],
+    "standard_fonts": [
+      "Helvetica",
+      "Arial",
+      "Calibri",
+      "Times-Roman"
+    ]
+  },
+  "privacy_and_security": {
+    "redact_pii_in_logs": true,
+    "mask_phone_number_in_public_reports": true,
+    "store_raw_job_days": 90,
+    "never_log_api_keys": true
+  }
+}

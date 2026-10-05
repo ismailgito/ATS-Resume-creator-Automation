@@ -1,0 +1,34 @@
+{
+  "source": "naukri",
+  "url": "https://www.naukri.com/job-listings-lead-enterprise-martech-consultant-mumbai-5-to-8-years-678901",
+  "title": "Lead Enterprise MarTech & Programmatic Consultant",
+  "company": "OmniGlobal Enterprises",
+  "location": "Mumbai, India",
+  "employment_type": "Full Time",
+  "experience_min": 5,
+  "experience_max": 8,
+  "salary": "INR 22,00,000 - 30,00,000 PA",
+  "description_raw": "Seeking a Lead Enterprise MarTech Consultant with 5+ years experience. Must have hands-on enterprise expertise with Salesforce Marketing Cloud (SFMC), Marketo, and programmatic media buying on Display & Video 360 (DV360) and The Trade Desk. Candidate will manage enterprise monthly media budgets exceeding INR 1.5 Crores.",
+  "must_have_skills": [
+    "Salesforce Marketing Cloud",
+    "Marketo",
+    "DV360",
+    "The Trade Desk",
+    "Programmatic Media Buying"
+  ],
+  "nice_to_have_skills": [
+    "Enterprise MarTech",
+    "CDP Integration"
+  ],
+  "platforms_and_tools": [
+    "Salesforce Marketing Cloud",
+    "Marketo",
+    "DV360",
+    "The Trade Desk"
+  ],
+  "responsibilities": [
+    "Architect enterprise customer journeys across Salesforce Marketing Cloud.",
+    "Execute programmatic DSP buys via DV360 and Trade Desk.",
+    "Manage multi-crore media budgets."
+  ]
+}

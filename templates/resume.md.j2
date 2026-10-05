@@ -1,0 +1,54 @@
+# {{ candidate.full_name }}
+{{ candidate.headline }}
+
+**Contact:** {{ candidate.contact.email }} | {{ candidate.contact.phone }} | {{ candidate.contact.location }}  
+**Profiles:** [LinkedIn]({{ candidate.contact.linkedin }}) | [Portfolio]({{ candidate.contact.portfolio }})
+
+---
+
+## Professional Summary
+{{ tailored.summary }}
+
+---
+
+## Core Competencies & Skills
+{% if tailored.skills %}
+{{ tailored.skills | join(" • ") }}
+{% else %}
+{{ candidate.skills | join(" • ") }}
+{% endif %}
+
+**Platforms & Tools:** {{ candidate.tools | join(", ") }}
+
+---
+
+## Professional Experience
+{% for role in tailored.experience %}
+### {{ role.title }} — {{ role.company }}
+*{{ role.location }} | {{ role.period }}*
+
+{% for bullet in role.bullets %}
+- {{ bullet }}
+{% endfor %}
+
+{% endfor %}
+
+---
+
+## Key Achievements & Impact
+{% for ach in candidate.achievements %}
+- **{{ ach.metric }}:** {{ ach.statement }} *(Evidence: {{ ach.time_period }})*
+{% endfor %}
+
+---
+
+## Education & Certifications
+### Education
+{% for edu in candidate.education %}
+- **{{ edu.degree }}** — {{ edu.institution }} ({{ edu.start_year }} - {{ edu.end_year }})
+{% endfor %}
+
+### Certifications
+{% for cert in candidate.certifications %}
+- **{{ cert.name }}** — {{ cert.issuer }} ({{ cert.date }})
+{% endfor %}

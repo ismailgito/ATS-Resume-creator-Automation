@@ -1,0 +1,31 @@
+{
+  "source": "manual",
+  "url": "https://www.naukri.com/job-listings-digital-marketing-executive-delhi-567890",
+  "title": "Digital Marketing Executive",
+  "company": "Vivid Media Agency",
+  "location": "New Delhi / Remote",
+  "employment_type": "Full Time",
+  "experience_min": null,
+  "experience_max": null,
+  "salary": null,
+  "description_raw": "Looking for a Digital Marketing Executive to join our boutique agency. Responsibilities include handling Google Ads, Meta ad campaigns, client weekly reporting, and assisting with conversion tracking in Google Analytics.",
+  "must_have_skills": [
+    "Digital Marketing",
+    "Google Ads",
+    "Meta Ads",
+    "Google Analytics"
+  ],
+  "nice_to_have_skills": [
+    "Reporting",
+    "Canva"
+  ],
+  "platforms_and_tools": [
+    "Google Ads",
+    "Meta Ads",
+    "Google Analytics"
+  ],
+  "responsibilities": [
+    "Manage daily ad bids and creative testing for clients.",
+    "Draft weekly performance summaries."
+  ]
+}

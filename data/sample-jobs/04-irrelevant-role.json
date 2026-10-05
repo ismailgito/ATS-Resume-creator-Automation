@@ -1,0 +1,37 @@
+{
+  "source": "naukri",
+  "url": "https://www.naukri.com/job-listings-senior-java-backend-engineer-pune-5-to-8-years-456789",
+  "title": "Senior Java Backend Engineer",
+  "company": "Enterprise Cloud Systems",
+  "location": "Pune, Maharashtra",
+  "employment_type": "Full Time",
+  "experience_min": 5,
+  "experience_max": 8,
+  "salary": "INR 18,00,000 - 26,00,000 PA",
+  "description_raw": "Seeking a Senior Java Backend Developer with 5+ years of experience designing and deploying microservices using Java 17, Spring Boot, Kafka, Kubernetes, PostgreSQL, and AWS. Must have deep expertise in multithreading, distributed caching with Redis, CI/CD pipelines, and high-throughput transaction systems.",
+  "must_have_skills": [
+    "Java",
+    "Spring Boot",
+    "Microservices",
+    "Kafka",
+    "Kubernetes",
+    "PostgreSQL"
+  ],
+  "nice_to_have_skills": [
+    "AWS",
+    "Redis",
+    "Docker"
+  ],
+  "platforms_and_tools": [
+    "Java",
+    "Spring Boot",
+    "Kafka",
+    "AWS",
+    "Docker"
+  ],
+  "responsibilities": [
+    "Architect and implement low-latency REST and gRPC microservices.",
+    "Design database schemas and optimize PostgreSQL query execution plans.",
+    "Maintain 99.99% service uptime across Kubernetes production clusters."
+  ]
+}

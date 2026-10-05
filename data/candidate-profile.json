@@ -1,0 +1,169 @@
+{
+  "candidate_id": "cand-perf-001",
+  "full_name": "Aarav Sharma",
+  "headline": "Performance & Digital Marketing Specialist | Paid Search & Social | CAC & ROAS Optimization",
+  "contact": {
+    "email": "aarav.sharma.mktg@example.com",
+    "phone": "+91 98765 43210",
+    "location": "Bengaluru, Karnataka, India",
+    "linkedin": "https://linkedin.com/in/aarav-sharma-marketing",
+    "portfolio": "https://aaravsharma.marketing"
+  },
+  "target_roles": [
+    "Performance Marketing Manager",
+    "Performance Marketing Specialist",
+    "Digital Marketing Manager",
+    "Growth Marketing Specialist",
+    "Paid Media Specialist"
+  ],
+  "experience_years": 2.5,
+  "location": "Bengaluru, Karnataka, India",
+  "work_authorization": "Citizen of India / Authorized to work full-time",
+  "notice_period_days": 30,
+  "current_ctc_lpa": 7.5,
+  "expected_ctc_lpa": 11.0,
+  "summary_facts": [
+    "2.5 years managing full-funnel performance marketing campaigns across B2C/D2C and B2B SaaS",
+    "Managed cumulative monthly ad budgets exceeding INR 25 Lakhs across Google Ads and Meta Ads Manager",
+    "Track record of scaling revenue by 140% while maintaining target blended ROAS of 3.8x",
+    "Expert in GA4 event tracking, GTM server-side container setups, and Looker Studio client dashboards",
+    "Proficient in rapid A/B creative testing, CRO landing page wireframing, and cohort attribution"
+  ],
+  "skills": [
+    "Performance Marketing",
+    "Paid Search (SEM)",
+    "Paid Social (Meta Ads)",
+    "PPC Strategy",
+    "Campaign Optimization",
+    "A/B Testing & Experimentation",
+    "Conversion Rate Optimization (CRO)",
+    "Funnel Analysis",
+    "Audience Segmentation & Retargeting",
+    "Budget Allocation & Forecasting",
+    "Landing Page Optimization",
+    "Attribution Modeling",
+    "Email & Retention Marketing"
+  ],
+  "tools": [
+    "Google Ads (Search, Display, PMax, YouTube)",
+    "Meta Ads Manager",
+    "LinkedIn Campaign Manager",
+    "Google Analytics 4 (GA4)",
+    "Google Tag Manager (GTM)",
+    "Looker Studio",
+    "Hotjar",
+    "Unbounce",
+    "Shopify",
+    "Klaviyo",
+    "AppsFlyer",
+    "SEMrush"
+  ],
+  "achievements": [
+    {
+      "id": "ach-01",
+      "statement": "Scaled Meta & Google Ads campaigns from INR 8L/month to INR 25L/month while boosting blended ROAS from 2.6x to 3.8x.",
+      "metric": "140% spend scale with 46% ROAS improvement",
+      "time_period": "Q3 2024 - Q2 2025",
+      "evidence": "Monthly audited Meta & Google Ads performance dashboards"
+    },
+    {
+      "id": "ach-02",
+      "statement": "Decreased customer acquisition cost (CAC) by 32% via structured search query sculpting, negative keyword expansion, and high-intent PMax asset group redesign.",
+      "metric": "32% CAC reduction",
+      "time_period": "Q1 2025",
+      "evidence": "Internal CRM blended CAC tracking sheet"
+    },
+    {
+      "id": "ach-03",
+      "statement": "Architected complete server-side GA4 and GTM tracking setup, capturing 18% previously unrecorded iOS 14.5+ conversions via Meta Conversions API (CAPI).",
+      "metric": "18% incremental conversion attribution recovered",
+      "time_period": "Q4 2024",
+      "evidence": "GTM Server Container & Meta Event Quality Score (9.2/10)"
+    },
+    {
+      "id": "ach-04",
+      "statement": "Led 45+ weekly creative and copy experimentation sprints, discovering 6 evergreen video hook angles that reduced Click-Through-Rate (CTR) cost by 28%.",
+      "metric": "28% CPC reduction and 45+ sprint tests run",
+      "time_period": "2024 - 2025",
+      "evidence": "Figma/Notion creative experimentation repository"
+    },
+    {
+      "id": "ach-05",
+      "statement": "Engineered automated Looker Studio executive dashboard integrating Google Ads, Meta Ads, and Shopify revenue for real-time daily ROAS tracking.",
+      "metric": "Saved 6 hours/week of manual spreadsheet reporting",
+      "time_period": "Q2 2024",
+      "evidence": "Production Looker Studio dashboard URL"
+    }
+  ],
+  "employment": [
+    {
+      "company": "Klarity Digital Media",
+      "title": "Performance Marketing Specialist",
+      "location": "Bengaluru, India (Hybrid)",
+      "start_date": "2024-03",
+      "end_date": "Present",
+      "is_current": true,
+      "responsibilities": [
+        "Manage end-to-end execution, budget pacing, and optimization for performance advertising accounts spanning D2C e-commerce and SaaS.",
+        "Formulate and execute account-level Google Ads strategies (Search, Performance Max, Demand Gen) and Meta Ads (Advantage+ Shopping, Retargeting).",
+        "Implement and audit web analytics configurations with GA4, GTM, and Meta Pixel/CAPI.",
+        "Collaborate with copywriters and designers to produce high-converting direct-response creatives, evaluating weekly KPI metrics.",
+        "Present bi-weekly ROAS, CAC, and conversion rate reports to client C-suite stakeholders."
+      ]
+    },
+    {
+      "company": "Nexus Growth Labs",
+      "title": "Digital Marketing Associate",
+      "location": "Bengaluru, India (On-site)",
+      "start_date": "2023-01",
+      "end_date": "2024-02",
+      "is_current": false,
+      "responsibilities": [
+        "Managed daily search keyword bidding, ad copy drafting, and negative keyword pruning across Google Search accounts.",
+        "Assisted in managing INR 5L/month Meta advertising spend targeting tiered lookalike and interest-based demographics.",
+        "Created client-ready weekly performance reports tracking impressions, clicks, conversions, and cost per lead.",
+        "Conducted landing page heat map audits in Hotjar, producing recommendations that lifted signup rate by 14%."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Visvesvaraya Technological University",
+      "degree": "Bachelor of Engineering (B.E.) in Information Science",
+      "start_year": 2018,
+      "end_year": 2022,
+      "grade": "First Class with Distinction"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Google Ads Search Certification",
+      "issuer": "Google Skillshop",
+      "date": "2024-05",
+      "url": "https://skillshop.credential.net/google-search"
+    },
+    {
+      "name": "Google Ads Measurement Certification",
+      "issuer": "Google Skillshop",
+      "date": "2024-06",
+      "url": "https://skillshop.credential.net/google-measurement"
+    },
+    {
+      "name": "Meta Certified Digital Marketing Associate",
+      "issuer": "Meta Blueprint",
+      "date": "2024-01",
+      "url": "https://www.credly.com/meta-certified"
+    }
+  ],
+  "links": [
+    { "name": "LinkedIn", "url": "https://linkedin.com/in/aarav-sharma-marketing" },
+    { "name": "Portfolio & Case Studies", "url": "https://aaravsharma.marketing" }
+  ],
+  "negative_constraints": [
+    "Do NOT claim Salesforce Marketing Cloud or Marketo experience (never used)",
+    "Do NOT claim programmatic buying via DV360 or Trade Desk (never used)",
+    "Do NOT claim management of monthly budgets exceeding INR 50 Lakhs",
+    "Do NOT claim native mobile iOS/Android app development skills",
+    "Do NOT claim more than 3 years of professional experience"
+  ]
+}

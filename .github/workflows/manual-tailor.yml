@@ -1,0 +1,64 @@
+name: Manual Job Resume Tailoring
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_url:
+        description: "Job Listing URL (Naukri or Public Posting)"
+        required: false
+        default: ""
+      job_title:
+        description: "Job Title (optional if URL provided)"
+        required: false
+        default: "Target Marketing Role"
+      company_name:
+        description: "Company Name (optional if URL provided)"
+        required: false
+        default: "Target Employer"
+      job_text:
+        description: "Or Paste Job Description Text directly"
+        required: false
+        default: ""
+      force_generate:
+        description: "Force generate resume regardless of score? (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  tailor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Tailor Resume Package
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.job_url }}" ]; then
+            python -m src.cli ingest --url "${{ github.event.inputs.job_url }}" ${{ github.event.inputs.force_generate == 'true' && '--force' || '' }}
+          elif [ -n "${{ github.event.inputs.job_text }}" ]; then
+            python -m src.cli ingest --text "${{ github.event.inputs.job_text }}" --title "${{ github.event.inputs.job_title }}" --company "${{ github.event.inputs.company_name }}" ${{ github.event.inputs.force_generate == 'true' && '--force' || '' }}
+          else
+            echo "Running default sample job..."
+            python -m src.cli run-sample 01-perf-mktg-manager
+          fi
+
+      - name: Upload Generated Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: tailored-resume-package
+          path: outputs/
+          retention-days: 30

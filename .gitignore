@@ -1,0 +1,43 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Environment and credentials - NEVER COMMIT!
+.env
+.env.local
+*.pem
+*.key
+*.token
+credentials.json
+token.json
+session.json
+
+# Database and logs
+*.db
+*.sqlite3
+*.log
+
+# Generated outputs (keep outputs folder, ignore individual run outputs)
+outputs/*/
+!outputs/.gitkeep
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
