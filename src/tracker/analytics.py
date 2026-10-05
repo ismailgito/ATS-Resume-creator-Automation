@@ -24,16 +24,10 @@ def generate_tracking_report(db: ApplicationTrackerDB) -> Dict[str, Any]:
 
     # Missing skill analysis from match_reports
     missing_skills_counter = collections.Counter()
-    with db._get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT missing_reqs_json FROM match_reports")
-        for row in cursor.fetchall():
-            try:
-                reqs = json.loads(row[0])
-                for r in reqs:
-                    missing_skills_counter[r] += 1
-            except Exception:
-                pass
+    all_missing_lists = db.get_all_missing_requirements()
+    for req_list in all_missing_lists:
+        for r in req_list:
+            missing_skills_counter[r] += 1
 
     return {
         "total_jobs_tracked": total_apps,

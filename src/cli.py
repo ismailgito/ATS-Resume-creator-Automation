@@ -24,7 +24,7 @@ def cmd_check_env(args):
     print("=" * 65)
     print(f"Project Directory : {PROJECT_ROOT}")
     print(f"Candidate Profile : {settings.candidate_profile_path} ({'Found' if settings.candidate_profile_path.exists() else 'Missing'})")
-    print(f"Database URL      : {settings.database_url}")
+    print(f"Supabase Database : {settings.supabase_url or settings.database_url or 'Not configured (using memory)'}")
     print(f"Current LLM Mode  : {settings.llm_provider.upper()}")
     print("-" * 65)
     print("CREDENTIALS STATUS:")

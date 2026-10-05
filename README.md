@@ -52,7 +52,7 @@
 - 🎯 **Transparent 7-Factor Match Scoring:** No black-box guesses. Scores job postings across Title Fit (20%), Required Skills (25%), Platform/Tools (15%), Experience Bounds (15%), Industry Domain (10%), Location/Work Mode (5%), and Achievement Evidence (10%).
 - 🛡️ **Strict Factuality Gate & Negative Constraints:** Automatically verifies all generated statements against candidate-provided facts. Enforces negative constraints (e.g., automatically rejects jobs requiring tools the candidate has never used).
 - 📄 **Triple Document Outputs:** Compiles an editable Word document (`.docx`), a searchable ATS-optimized PDF (`.pdf`), and clean Markdown (`.md`) alongside a customized cover letter.
-- 📊 **SQLite Audit Tracking & Skill Gap Analytics:** Tracks application lifecycles from discovery to interview/offer and highlights recurring industry skill gaps.
+- 📊 **Supabase PostgreSQL Audit Tracking & Skill Gap Analytics:** Tracks application lifecycles from discovery to interview/offer and highlights recurring industry skill gaps.
 - 🔑 **Drop-In Credentials Model:** Paste Google Gemini, OpenAI, Claude, or Naukri credentials at your convenience without altering code.
 
 ---
@@ -101,7 +101,7 @@ python -m src.cli check-env
 =================================================================
 Project Directory : C:\Users\user\Documents\ATS-Resume-Automation
 Candidate Profile : data/candidate-profile.json (Found)
-Database URL      : sqlite:///ats_tracker.db
+Database URL      : https://your-project-ref.supabase.co
 Current LLM Mode  : OFFLINE
 -----------------------------------------------------------------
 CREDENTIALS STATUS:
@@ -110,7 +110,7 @@ CREDENTIALS STATUS:
   * Anthropic Api         : [--] Not configured (Offline mode ready)
   * Naukri Api            : [--] Not configured (Offline mode ready)
   * Apify Api             : [--] Not configured (Offline mode ready)
-  * Database Configured   : [OK] Configured
+  * Supabase Database     : [OK] Configured
 -----------------------------------------------------------------
 >> Status: Running in DETERMINISTIC OFFLINE MODE.
    The system functions immediately with deterministic rules & templates.

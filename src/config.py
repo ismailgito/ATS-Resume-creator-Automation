@@ -47,8 +47,10 @@ class AppSettings:
     naukri_client_id: Optional[str] = os.getenv("NAUKRI_CLIENT_ID")
     apify_api_token: Optional[str] = os.getenv("APIFY_API_TOKEN")
 
-    # Database
-    database_url: str = os.getenv("DATABASE_URL", "sqlite:///ats_tracker.db")
+    # Supabase Database Configuration
+    supabase_url: Optional[str] = os.getenv("SUPABASE_URL")
+    supabase_key: Optional[str] = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_ANON_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    database_url: Optional[str] = os.getenv("DATABASE_URL")
 
     # Paths
     candidate_profile_path: Path = PROJECT_ROOT / os.getenv("CANDIDATE_PROFILE_PATH", "data/candidate-profile.json")
@@ -80,13 +82,17 @@ class AppSettings:
         def is_valid(val: Optional[str]) -> bool:
             return bool(val and not val.startswith("your_") and len(val.strip()) > 5)
 
+        is_supabase_ready = (is_valid(self.supabase_url) and is_valid(self.supabase_key)) or (
+            bool(self.database_url) and ("postgres://" in self.database_url or "postgresql://" in self.database_url)
+        )
+
         return {
             "gemini_api": is_valid(self.gemini_api_key),
             "openai_api": is_valid(self.openai_api_key),
             "anthropic_api": is_valid(self.anthropic_api_key),
             "naukri_api": is_valid(self.naukri_api_token),
             "apify_api": is_valid(self.apify_api_token),
-            "database_configured": bool(self.database_url),
+            "supabase_database": is_supabase_ready,
         }
 
 
