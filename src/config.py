@@ -61,6 +61,10 @@ class AppSettings:
 
     min_match_score: float = float(os.getenv("MIN_MATCH_SCORE", "75.0"))
 
+    # Notification & daily limit settings
+    notify_webhook_url: str = os.getenv("NOTIFY_WEBHOOK_URL", "")
+    daily_limit: int = int(os.getenv("DAILY_LIMIT", "10"))
+
     def has_llm_credentials(self) -> bool:
         """Check whether any live LLM API keys are provided."""
         if self.llm_provider == "gemini" and self.gemini_api_key and "your_" not in self.gemini_api_key:

@@ -22,6 +22,7 @@ from src.resume.tailor import ResumeTailor
 from src.score.scorer import MatchScorer
 from src.tracker.db import ApplicationTrackerDB
 from src.validate.validator import ResumeValidator
+from src.notifications import send_notification
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,42 @@ class ResumeAutomationPipeline:
         """
         Process a job through the full pipeline:
         Ingest -> Parse -> Score -> (Tailor -> Render -> Validate -> Review Package)
+
+        Enforces the daily creation limit (``DAILY_LIMIT`` env var, default 10).
+        Sends a webhook notification when the limit is reached or if processing
+        fails mid-workflow (``NOTIFY_WEBHOOK_URL`` env var).
         """
+        try:
+            match_report, review_pkg = self._process_job_inner(
+                job_record, candidate=candidate, force_generate=force_generate
+            )
+        except Exception as exc:
+            err_msg = f"❌ Workflow stopped with error: {exc}"
+            logger.error(err_msg)
+            send_notification(err_msg)
+            raise
+
+        # Increment daily completion counter & notify if limit reached
+        # (only when a full review package was generated, i.e. not skipped)
+        if review_pkg is not None:
+            daily_limit = self.settings.daily_limit
+            today_count = self.db.increment_completion(daily_limit=daily_limit)
+            if today_count >= daily_limit:
+                notify_msg = (
+                    f"✅ {today_count} resumes completed for today – daily limit of {daily_limit} reached."
+                )
+                logger.info(notify_msg)
+                send_notification(notify_msg)
+
+        return match_report, review_pkg
+
+    def _process_job_inner(
+        self,
+        job_record: JobRecord,
+        candidate: Optional[CandidateProfile] = None,
+        force_generate: bool = False,
+    ) -> Tuple[MatchReport, Optional[ReviewPackage]]:
+        """Internal implementation of the full processing pipeline."""
         cand = candidate or self.load_profile()
 
         # 1. Save raw job record to database

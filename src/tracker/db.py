@@ -117,6 +117,15 @@ class ApplicationTrackerDB:
             )
             """
         )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS daily_completion (
+                date TEXT PRIMARY KEY,
+                count INTEGER NOT NULL DEFAULT 0,
+                limit_val INTEGER NOT NULL DEFAULT 10
+            )
+            """
+        )
         self._mem_conn.commit()
 
     def _init_postgres_tables(self):
@@ -166,6 +175,11 @@ class ApplicationTrackerDB:
                             discovered_at TIMESTAMPTZ DEFAULT NOW(),
                             submitted_at TIMESTAMPTZ,
                             outcome TEXT
+                        );
+                        CREATE TABLE IF NOT EXISTS daily_completion (
+                            date TEXT PRIMARY KEY,
+                            count INTEGER NOT NULL DEFAULT 0,
+                            limit_val INTEGER NOT NULL DEFAULT 10
                         );
                         """
                     )
@@ -545,3 +559,111 @@ class ApplicationTrackerDB:
             except Exception:
                 pass
         return results
+
+    # ------------------------------------------------------------------
+    # Daily completion counter
+    # ------------------------------------------------------------------
+
+    def get_today_count(self) -> int:
+        """Return the number of successfully completed resumes for today (UTC)."""
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        if self.backend == "supabase_rest":
+            url = f"{self.supabase_url}/rest/v1/daily_completion?date=eq.{today}&select=count"
+            try:
+                resp = requests.get(url, headers=self._supabase_headers(merge=False), timeout=10)
+                if resp.status_code == 200 and resp.json():
+                    return int(resp.json()[0].get("count", 0))
+            except Exception as exc:
+                logger.warning("Could not fetch daily count from Supabase: %s", exc)
+            return 0
+
+        if self.backend == "postgres" and psycopg2:
+            try:
+                conn = psycopg2.connect(self.database_url)
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "SELECT count FROM daily_completion WHERE date = %s;",
+                            (today,),
+                        )
+                        row = cur.fetchone()
+                        return int(row[0]) if row else 0
+                finally:
+                    conn.close()
+            except Exception as exc:
+                logger.warning("Could not fetch daily count from PostgreSQL: %s", exc)
+            return 0
+
+        # In-memory fallback
+        cursor = self._mem_conn.cursor()
+        cursor.execute("SELECT count FROM daily_completion WHERE date = ?", (today,))
+        row = cursor.fetchone()
+        return int(row[0]) if row else 0
+
+    def increment_completion(self, daily_limit: int = 10) -> int:
+        """Atomically increment today's completion counter.
+
+        Inserts a row for today if one does not exist yet, then increments.
+        Returns the updated count *after* increment.  When the count reaches
+        *daily_limit* the caller should fire a completion notification.
+        """
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        if self.backend == "supabase_rest":
+            # Upsert: insert with count=1 or increment existing count
+            upsert_url = f"{self.supabase_url}/rest/v1/daily_completion"
+            current = self.get_today_count()
+            new_count = current + 1
+            payload = {"date": today, "count": new_count, "limit_val": daily_limit}
+            try:
+                resp = requests.post(
+                    upsert_url,
+                    json=payload,
+                    headers=self._supabase_headers(merge=True),
+                    timeout=10,
+                )
+                if resp.status_code not in (200, 201, 204):
+                    logger.warning("Supabase upsert for daily_completion failed: %s", resp.text[:200])
+            except Exception as exc:
+                logger.warning("Could not increment daily count in Supabase: %s", exc)
+            return new_count
+
+        if self.backend == "postgres" and psycopg2:
+            try:
+                conn = psycopg2.connect(self.database_url)
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            INSERT INTO daily_completion (date, count, limit_val)
+                            VALUES (%s, 1, %s)
+                            ON CONFLICT (date) DO UPDATE
+                                SET count = daily_completion.count + 1,
+                                    limit_val = EXCLUDED.limit_val
+                            RETURNING count;
+                            """,
+                            (today, daily_limit),
+                        )
+                        new_count = cur.fetchone()[0]
+                        conn.commit()
+                        return int(new_count)
+                finally:
+                    conn.close()
+            except Exception as exc:
+                logger.warning("Could not increment daily count in PostgreSQL: %s", exc)
+                return self.get_today_count()
+
+        # In-memory SQLite fallback (atomic via Python-level GIL for single process)
+        cursor = self._mem_conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO daily_completion (date, count, limit_val)
+            VALUES (?, 1, ?)
+            ON CONFLICT(date) DO UPDATE SET count = count + 1, limit_val = excluded.limit_val
+            """,
+            (today, daily_limit),
+        )
+        self._mem_conn.commit()
+        cursor.execute("SELECT count FROM daily_completion WHERE date = ?", (today,))
+        return int(cursor.fetchone()[0])
