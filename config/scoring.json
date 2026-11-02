@@ -21,7 +21,9 @@
       "adwords",
       "sem",
       "ppc",
+      "sea",
       "search ads",
+      "paid search",
       "pmax",
       "performance max"
     ],
@@ -54,11 +56,27 @@
       "looker studio",
       "google data studio",
       "data studio",
-      "looker"
+      "looker",
+      "google sheets"
     ],
     "linkedin_ads": [
       "linkedin ads",
       "linkedin campaign manager"
+    ],
+    "marketing_automation": [
+      "n8n",
+      "marketing automation",
+      "automation",
+      "workflow automation",
+      "zapier",
+      "make"
+    ],
+    "analytics": [
+      "web analytics",
+      "digital analytics",
+      "marketing analytics",
+      "funnel analysis",
+      "tracking"
     ]
   }
 }

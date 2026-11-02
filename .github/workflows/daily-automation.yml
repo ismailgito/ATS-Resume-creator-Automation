@@ -1,0 +1,148 @@
+name: Daily CSV Job Automation (Gemini + Telegram)
+
+on:
+  schedule:
+    # Runs daily at 08:00 UTC = 1:30 PM IST
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      csv_url:
+        description: "Override CSV URL (leave blank to use JOBS_CSV_URL secret)"
+        required: false
+        default: ""
+      min_score:
+        description: "Minimum ATS match score to generate resume (0-100)"
+        required: false
+        default: "75"
+      daily_limit:
+        description: "Max resumes to generate this run (hard stop)"
+        required: false
+        default: "10"
+      force_generate:
+        description: "Force generate resumes for ALL rows, ignoring score? (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  csv-automation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      # 1. Checkout
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Python setup
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      # 3. Fetch CSV from URL
+      - name: Fetch Jobs CSV
+        id: fetch_csv
+        env:
+          JOBS_CSV_URL: ${{ github.event.inputs.csv_url || secrets.JOBS_CSV_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          mkdir -p jobs
+
+          if [ -z "$JOBS_CSV_URL" ]; then
+            echo "::error::JOBS_CSV_URL is not set. Add it as a GitHub Secret or pass it as a workflow input."
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+              MSG="ATS Automation: JOBS_CSV_URL secret is not configured. Run aborted."
+              curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+                --data-urlencode "text=${MSG}"
+            fi
+            exit 1
+          fi
+
+          echo "Fetching CSV from: $JOBS_CSV_URL"
+          HTTP_STATUS=$(curl -sS -w "%{http_code}" -o jobs/daily-jobs.csv "$JOBS_CSV_URL")
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::Failed to fetch CSV - HTTP status $HTTP_STATUS"
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+              MSG="ATS Automation: CSV fetch failed (HTTP ${HTTP_STATUS}). Check JOBS_CSV_URL secret."
+              curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+                --data-urlencode "text=${MSG}"
+            fi
+            exit 1
+          fi
+
+          JOB_COUNT=$(tail -n +2 jobs/daily-jobs.csv | grep -c . || true)
+          echo "CSV fetched successfully - ${JOB_COUNT} job row(s) found."
+          echo "job_count=$JOB_COUNT" >> "$GITHUB_OUTPUT"
+
+      # 4. Run ATS Pipeline against the CSV
+      - name: Run ATS Pipeline Against CSV
+        id: run_pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LLM_PROVIDER: gemini
+          RESUME_STYLE: de
+          MIN_MATCH_SCORE: ${{ github.event.inputs.min_score || '75' }}
+          DAILY_LIMIT: ${{ github.event.inputs.daily_limit || '10' }}
+        run: |
+          FORCE_FLAG=""
+          if [ "${{ github.event.inputs.force_generate }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          python -m src.cli ingest --file jobs/daily-jobs.csv $FORCE_FLAG
+
+      # 5. Analytics report
+      - name: Generate Analytics Report
+        if: always()
+        run: python -m src.cli report || true
+
+      # 6. Upload resume packages as downloadable artifact
+      - name: Upload Resume Packages
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resume-packages-run-${{ github.run_number }}
+          path: outputs/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      # 7. Telegram run summary (always fires, even on failure)
+      - name: Telegram Run Summary
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_COUNT: ${{ steps.fetch_csv.outputs.job_count || '?' }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram not configured - skipping summary notification."
+            exit 0
+          fi
+
+          PKG_COUNT=$(find outputs/ -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | xargs || echo 0)
+
+          if [ "$RUN_STATUS" = "success" ]; then
+            ICON="OK"
+          else
+            ICON="FAILED"
+          fi
+
+          MSG="${ICON}: ATS Daily CSV Run (${RUN_STATUS}) | Jobs: ${JOB_COUNT} | Packages: ${PKG_COUNT} | ${RUN_URL}"
+
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${MSG}" \
+            || echo "::warning::Telegram summary message failed to send"

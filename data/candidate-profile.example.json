@@ -1,42 +1,252 @@
 {
-  "candidate_id": "cand-example-001",
-  "full_name": "Full Name",
-  "headline": "Target Role Title | Core Specialization | Measurable Value",
+  "candidate_id": "cand-ismail-001",
+  "full_name": "Mohamed Ismail",
+  "headline": "Junior Performance Marketer | Meta Ads, Google Ads, GA4, GTM | n8n automation",
   "contact": {
-    "email": "candidate@example.com",
-    "phone": "+91 99999 88888",
-    "location": "City, Country",
-    "linkedin": "https://linkedin.com/in/username",
-    "portfolio": "https://portfolio.example.com"
+    "email": "dadobeb553@gmail.com",
+    "phone": "+91 93842 22784",
+    "location": "Chennai, India (Berlin, Germany / Approved German Opportunity Card)",
+    "linkedin": "https://www.linkedin.com/in/mohamed-ismail-marketing",
+    "portfolio": "https://marketingportfolio7.netlify.app",
+    "github": "https://github.com/ismailgito"
   },
-  "target_roles": ["Performance Marketing Manager", "Digital Marketing Specialist"],
-  "experience_years": 2.0,
-  "location": "Bengaluru, India",
-  "work_authorization": "Authorized to work full-time",
-  "notice_period_days": 30,
-  "current_ctc_lpa": 6.0,
-  "expected_ctc_lpa": 9.5,
-  "summary_facts": [
-    "Fact 1: Years of experience and primary marketing channels",
-    "Fact 2: Ad budget scale and ROAS achievements",
-    "Fact 3: Measurement tools and tracking expertise"
+  "target_roles": [
+    "Junior Performance Marketing Manager",
+    "Performance Marketing Manager",
+    "Performance Marketing Specialist",
+    "Performance Marketing Assistant",
+    "Junior Paid Media / Paid Advertising Manager",
+    "Junior Paid Media Manager",
+    "Paid Advertising Manager",
+    "Paid Social Specialist",
+    "Paid Media Assistant",
+    "Junior SEA / PPC Manager",
+    "Junior SEA Manager",
+    "PPC Specialist",
+    "Google Ads Specialist",
+    "SEA Trainee",
+    "Digital Marketing Specialist, Paid Acquisition",
+    "Digital Marketing Specialist",
+    "Digital Acquisition Specialist",
+    "Online Marketing Specialist",
+    "Marketing Analytics / Digital Analytics Assistant",
+    "Marketing Analyst",
+    "Digital Marketing Analyst",
+    "Junior Digital Analytics Consultant",
+    "Marketing Performance Analyst",
+    "Growth Marketing Associate",
+    "Junior Growth Marketer",
+    "Growth Marketing Specialist",
+    "Junior CRO / Conversion Optimization Specialist",
+    "Marketing Automation Assistant / Junior CRM Automation Specialist",
+    "Junior Ecommerce Marketing Specialist",
+    "SEO and Content Operations Specialist",
+    "Marketing Operations / MarTech Assistant"
   ],
-  "skills": ["Performance Marketing", "Google Ads", "Meta Ads", "GA4", "GTM"],
-  "tools": ["Google Ads", "Meta Ads Manager", "Google Analytics 4", "Google Tag Manager"],
+  "experience_years": 1.0,
+  "location": "Chennai, India / Berlin, Germany",
+  "work_authorization": "Approved German Opportunity Card (Chancenkarte) / Indian Citizen",
+  "notice_period_days": 15,
+  "current_ctc_lpa": null,
+  "expected_ctc_lpa": null,
+  "date_of_birth": "",
+  "address": "",
+  "photo": "",
+  "summary_facts": [
+    "Junior performance marketer with two internships in lead generation and paid social across B2B software and tech services.",
+    "Helped run a Meta Ads lead-gen campaign at IntoAEC (Instant Forms, warm vs cold ad sets) delivering 11 leads with warm CPL ₹842 vs ₹1,895 cold.",
+    "Conducted ad placement and form conversion analysis revealing Instagram CPL was ~3x lower than Facebook and 4% link-click-to-lead conversion rate.",
+    "Configured GA4 internal-traffic filters, Demo Booking key events, and Microsoft Clarity funnel tracking, plus a standalone GTM container for maec.ai.",
+    "Built automated Meta Ads competitor analysis workflow with n8n, Apify, and Gemini API that logs long-running ads to Google Sheets and sends Telegram alerts.",
+    "Developed Next.js SEO Backlinks Tracker (194 directory records with CSV export) and AI Content Efficiency Tool for LLM token usage optimization.",
+    "Approved German Opportunity Card (Chancenkarte) holder, actively seeking junior performance marketing and online marketing roles in Germany."
+  ],
+  "skills": [
+    "Performance Marketing",
+    "Paid Social",
+    "Paid Advertising",
+    "Meta Ads",
+    "Google Ads",
+    "Google Ads (SEA)",
+    "SEA",
+    "PPC",
+    "SEM",
+    "Paid Acquisition",
+    "Lead Generation",
+    "ROAS Optimization",
+    "CPL Optimization",
+    "Budget Allocation",
+    "Bid Management",
+    "Conversion Rate Optimization (CRO)",
+    "A/B Testing",
+    "Funnel Analysis",
+    "Web Analytics",
+    "Google Analytics 4 (GA4)",
+    "Google Tag Manager (GTM)",
+    "Meta Pixel",
+    "UTM Tracking",
+    "Multi-Touch Attribution",
+    "Marketing Automation",
+    "Competitor Ad Analysis",
+    "SEO & Link Building"
+  ],
+  "tools": [
+    "Meta Ads Manager",
+    "Google Ads",
+    "Google Analytics 4 (GA4)",
+    "Google Tag Manager (GTM)",
+    "Microsoft Clarity",
+    "n8n",
+    "Apify",
+    "Gemini API",
+    "Claude Code",
+    "HubSpot",
+    "Next.js",
+    "React",
+    "Semrush",
+    "Ahrefs",
+    "Ubersuggest",
+    "Looker Studio",
+    "Google Sheets"
+  ],
   "achievements": [
     {
       "id": "ach-01",
-      "statement": "Key verified business achievement with metrics",
-      "metric": "X% improvement in Y",
-      "time_period": "2024",
-      "evidence": "Audited dashboard or report link"
+      "statement": "Helped run a Meta Ads lead-gen campaign (Instant Forms, warm vs cold ad sets): set-up, monitoring, CPL tracking, reporting. Delivered 11 qualified leads by 22 Oct 2026 with warm CPL ₹842 vs ₹1,895 cold.",
+      "metric": "11 leads generated with warm CPL ₹842 (55% lower than cold CPL ₹1,895)",
+      "time_period": "07/2026 - 10/2026",
+      "evidence": "IntoAEC Meta Ads Manager & CPL tracking campaign report"
+    },
+    {
+      "id": "ach-02",
+      "statement": "Analysed results by placement discovering Instagram CPL was about 3x lower than Facebook, and 4% of link clicks became leads; recommended manual placements and shorter Instant Form fields.",
+      "metric": "3x lower Instagram CPL identified with placement-level efficiency insights",
+      "time_period": "07/2026 - 10/2026",
+      "evidence": "IntoAEC campaign placement & Instant Form conversion analysis"
+    },
+    {
+      "id": "ach-03",
+      "statement": "Added a GA4 internal-traffic filter, a Demo Booking key event and funnel tracking (GA4, Microsoft Clarity); set up a separate GTM container for maec.ai while Ubersuggest Domain Authority rose from 5 to 13.",
+      "metric": "Demo booking funnel tracking deployed & DA increased from 5 to 13",
+      "time_period": "07/2026 - 08/2026",
+      "evidence": "GTM container for maec.ai & GA4 custom key events"
+    },
+    {
+      "id": "ach-04",
+      "statement": "Built production Meta Ads Competitor Analysis Automation using n8n, Apify, and Gemini API to scrape long-running Meta Ads Library ads, classify hooks and CTAs, log to Google Sheets, and send Telegram summaries.",
+      "metric": "Fully automated competitor ad scraping & LLM classification pipeline",
+      "time_period": "2026",
+      "evidence": "GitHub repository: ismailgito/Meta-ads-scraper-automation"
+    },
+    {
+      "id": "ach-05",
+      "statement": "Engineered Next.js SEO Backlinks Tracker managing 194 directory outreach records with status filtering and CSV export capabilities.",
+      "metric": "194 outreach records tracked with live Next.js web application",
+      "time_period": "2026",
+      "evidence": "Live production application: seo-backlinks-tracker.vercel.app"
     }
   ],
-  "employment": [],
-  "education": [],
-  "certifications": [],
-  "links": [],
+  "employment": [
+    {
+      "company": "IntoAEC",
+      "title": "Digital Marketing Intern",
+      "location": "Remote / Chennai, India",
+      "start_date": "2026-07",
+      "end_date": "2026-10",
+      "is_current": false,
+      "responsibilities": [
+        "Helped execute Meta Ads lead-generation campaigns (Instant Forms, warm vs cold audience sets), managing setup, daily monitoring, CPL tracking, and weekly performance reporting.",
+        "Delivered 11 leads with warm CPL at ₹842 vs ₹1,895 cold, isolating placement performance where Instagram CPL was ~3x lower than Facebook.",
+        "Analyzed link clicks vs lead conversions (~4% conversion rate) and recommended manual placement allocation and streamlined instant form fields.",
+        "Configured GA4 internal traffic filters, Demo Booking custom key events, and Microsoft Clarity funnel tracking; deployed separate GTM container for maec.ai.",
+        "Executed backlink submissions supporting Ubersuggest Domain Authority growth from 5 to 13."
+      ]
+    },
+    {
+      "company": "Ifelse Techsmart Solutions Pvt Ltd",
+      "title": "Sales & Marketing Intern",
+      "location": "Chennai, India",
+      "start_date": "2023-08",
+      "end_date": "2023-11",
+      "is_current": false,
+      "responsibilities": [
+        "Executed social media marketing campaigns across organic and paid channels to generate prospect interest.",
+        "Qualified incoming inbound leads through structured discovery questions and logged status updates in CRM.",
+        "Conducted CRM follow-up sequences and assisted the sales pipeline to accelerate prospect engagement."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "The New College, University of Madras",
+      "degree": "Bachelor of Business Administration (BBA)",
+      "start_year": 2020,
+      "end_year": 2024,
+      "grade": ""
+    }
+  ],
+  "certifications": [
+    {
+      "name": "n8n Academy: Essentials & First Workflows",
+      "issuer": "n8n Academy",
+      "date": "2026-07",
+      "url": "https://academy.n8n.io"
+    },
+    {
+      "name": "AI-Powered Marketer",
+      "issuer": "Semrush",
+      "date": "2026-05",
+      "url": "https://semrush.com"
+    },
+    {
+      "name": "Conversion Rate Optimization (CRO)",
+      "issuer": "CXL",
+      "date": "2026-05",
+      "url": "https://cxl.com"
+    },
+    {
+      "name": "Google Analytics 4 (GA4) Certification",
+      "issuer": "Google Skillshop",
+      "date": "2026-04",
+      "url": "https://skillshop.credential.net"
+    },
+    {
+      "name": "Performance Marketing Certification",
+      "issuer": "Tute Dude",
+      "date": "2026-04",
+      "url": "https://tutedude.com"
+    },
+    {
+      "name": "Digital Marketing Certification",
+      "issuer": "HubSpot Academy",
+      "date": "2026-04",
+      "url": "https://academy.hubspot.com"
+    },
+    {
+      "name": "Conversational German Program Certificate",
+      "issuer": "Y-Axis",
+      "date": "2026-01",
+      "url": "https://y-axis.com"
+    },
+    {
+      "name": "Full Stack Web Development",
+      "issuer": "Udemy",
+      "date": "2025-08",
+      "url": "https://udemy.com"
+    }
+  ],
+  "links": [
+    { "name": "LinkedIn", "url": "https://www.linkedin.com/in/mohamed-ismail-marketing" },
+    { "name": "Portfolio", "url": "https://marketingportfolio7.netlify.app" },
+    { "name": "GitHub", "url": "https://github.com/ismailgito" },
+    { "name": "WhatsApp", "url": "https://wa.me/919384222784" }
+  ],
   "negative_constraints": [
-    "Do NOT claim skills/tools not verified in this profile"
+    "Do NOT claim fluent German (German proficiency is beginner / A1, currently learning via conversational program)",
+    "Do NOT claim Senior Manager, Marketing Lead, or Head of Growth roles (Junior / Specialist level only)",
+    "Do NOT claim Salesforce Marketing Cloud or Marketo enterprise experience (never used)",
+    "Do NOT claim programmatic buying via DV360 or The Trade Desk (never used)",
+    "Do NOT claim managing monthly advertising budgets exceeding verified campaign spend (keep all numbers defensible)",
+    "Do NOT market as a generic digital marketer; emphasize Junior Performance Marketer with Analytics, CRO, and n8n automation"
   ]
 }

@@ -946,5 +946,59 @@ python -m src.cli report                     # Skill gap report & pipeline stats
 
 ---
 
+## 16. German Resume Format (Lebenslauf) — Default
+
+The system now defaults to a **German-style Lebenslauf** format while keeping your
+resume **content in English** and generating a **German-wrapped cover note (Anschreiben)**.
+
+### What changes in the output
+
+| Element | German style (`de`, default) | US style (`us`) |
+|---|---|---|
+| Document title | `Lebenslauf` above your name | none |
+| Sections | `Persönliche Daten`, `Kurzprofil`, `Kenntnisse & Fähigkeiten`, `Berufserfahrung`, `Erfolge & Wirkung`, `Ausbildung & Zertifikate` | `Professional Summary`, `Core Competencies & Skills`, ... |
+| Dates | `MM/YYYY` (e.g. `06/2022 - Present`) | `Jun 2022 - Present` |
+| Today's date | `02. November 2026` | `November 02, 2026` |
+| PDF footer | `Seite 1/2` | `Page 1/2` |
+| Cover note | `Anschreiben` with `Betreff:`, `Sehr geehrte Damen und Herren,`, `Mit freundlichen Grüßen` — **body stays English** | `Application Cover Note`, `Dear Hiring Team,`, `Sincerely` |
+
+### Switching styles
+
+Option A — `.env` file (wins over everything):
+```env
+RESUME_STYLE=de     # German Lebenslauf (default)
+RESUME_STYLE=us     # classic US/international
+```
+
+Option B — `config/policy.yaml` (used when the env var is blank):
+```yaml
+ats_formatting:
+  resume_style: "de"    # change to "us" to revert
+```
+
+All three renderers (Markdown, DOCX, PDF) read the same section definitions from
+`src/resume/sections.py`, so headings can never drift between formats.
+
+### Optional "Persönliche Daten" fields in your profile
+
+Add any of these to `data/candidate-profile.json` — they render **only when filled in**
+(modern German CVs often omit photo and date of birth):
+
+```jsonc
+{
+  "date_of_birth": "1998-05-12",      // rendered as "Date of Birth" row
+  "address": "Musterstraße 1, 10115 Berlin, Germany",
+  "photo": "path/to/photo.jpg"        // referenced by filename
+}
+```
+
+> [!NOTE]
+> Body content (summary, bullets, cover-note body) is still produced in English by the
+> tailoring engine. Only headings, date formats, and the cover-note wrapper follow the
+> German style. To write the body in German too, add an LLM key (see Step 5) and
+> instruct your prompt file `prompts/tailor-resume.md` accordingly.
+
+---
+
 *Generated for ATS Resume Creator Automation — Supabase Edition.*
 *Last updated: October 2026*

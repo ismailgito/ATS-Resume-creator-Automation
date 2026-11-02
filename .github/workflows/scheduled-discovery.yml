@@ -1,9 +1,9 @@
 name: Scheduled Discovery & Match Pipeline
 
 on:
-  # Disabled automatic daily execution to prevent auto-generating resumes.
-  # schedule:
-  #   - cron: "0 4 * * *"
+  schedule:
+    # Trigger daily at 1:30 PM IST (UTC+5:30 -> 08:00 AM UTC)
+    - cron: "0 8 * * *"
   workflow_dispatch:
     inputs:
       min_score:
@@ -33,6 +33,9 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           MIN_MATCH_SCORE: ${{ github.event.inputs.min_score || 75 }}
+          # Enables Telegram alerts for daily-limit / mid-run errors
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python -m src.cli run-sample all
 
@@ -46,3 +49,29 @@ jobs:
           name: daily-review-packages
           path: outputs/
           retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Telegram Run Summary
+        # Always fires – success or failure – but skips gracefully when the
+        # Telegram secrets are not configured on the repository.
+        if: ${{ always() }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets not configured - skipping summary."
+            exit 0
+          fi
+          if [ "$RUN_STATUS" = "success" ]; then
+            TEXT="✅ ATS daily discovery run completed successfully — ${RUN_URL}"
+          else
+            TEXT="❌ ATS daily discovery run ${RUN_STATUS} — ${RUN_URL}"
+          fi
+          python -c 'import json, os; print(json.dumps({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": os.environ["TEXT"]}))' > "$RUNNER_TEMP/tg_payload.json"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d @"$RUNNER_TEMP/tg_payload.json" \
+            || echo "::warning::Telegram summary message failed to send"

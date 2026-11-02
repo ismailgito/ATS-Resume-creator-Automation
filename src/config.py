@@ -61,9 +61,34 @@ class AppSettings:
 
     min_match_score: float = float(os.getenv("MIN_MATCH_SCORE", "75.0"))
 
+    # Resume style: "de" (German Lebenslauf, default) or "us" (classic international).
+    # Empty string means "read from config/policy.yaml -> ats_formatting.resume_style".
+    resume_style: str = os.getenv("RESUME_STYLE", "").strip().lower()
+
     # Notification & daily limit settings
-    notify_webhook_url: str = os.getenv("NOTIFY_WEBHOOK_URL", "")
+    # (read via default_factory so each AppSettings() sees the *current*
+    # environment — required for runtime overrides and hermetic tests)
+    notify_webhook_url: str = field(
+        default_factory=lambda: os.getenv("NOTIFY_WEBHOOK_URL", "")
+    )
+    telegram_bot_token: str = field(
+        default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", "")
+    )
+    telegram_chat_id: str = field(
+        default_factory=lambda: os.getenv("TELEGRAM_CHAT_ID", "")
+    )
     daily_limit: int = int(os.getenv("DAILY_LIMIT", "10"))
+
+    def has_telegram_credentials(self) -> bool:
+        """Check whether a usable Telegram bot token + chat id are provided."""
+        token = (self.telegram_bot_token or "").strip()
+        chat_id = (self.telegram_chat_id or "").strip()
+        return bool(
+            token
+            and chat_id
+            and "your_" not in token
+            and not token.startswith("<")
+        )
 
     def has_llm_credentials(self) -> bool:
         """Check whether any live LLM API keys are provided."""
@@ -97,6 +122,7 @@ class AppSettings:
             "naukri_api": is_valid(self.naukri_api_token),
             "apify_api": is_valid(self.apify_api_token),
             "supabase_database": is_supabase_ready,
+            "telegram": self.has_telegram_credentials(),
         }
 
 

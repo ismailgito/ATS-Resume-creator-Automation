@@ -1,17 +1,43 @@
-# Target Role Configuration for ATS Resume Automation
+# Target Role & Location Configuration for ATS Resume Automation
+# Configured for Mohamed Ismail based on "Target roles - loactions.md"
+
 target_roles:
-  - "Performance Marketing Manager"
+  - "Junior Performance Marketing Manager"
   - "Performance Marketing Specialist"
-  - "Digital Marketing Manager"
-  - "Digital Marketing Specialist"
-  - "Growth Marketing Specialist"
-  - "Paid Media Specialist"
+  - "Performance Marketing Assistant"
+  - "Junior Paid Media / Paid Advertising Manager"
+  - "Junior Paid Media Manager"
+  - "Paid Advertising Manager"
+  - "Paid Social Specialist"
+  - "Paid Media Assistant"
+  - "Junior SEA / PPC Manager"
+  - "Junior SEA Manager"
   - "PPC Specialist"
+  - "Google Ads Specialist"
+  - "SEA Trainee"
+  - "Digital Marketing Specialist, Paid Acquisition"
+  - "Digital Marketing Specialist"
+  - "Digital Acquisition Specialist"
+  - "Online Marketing Specialist"
+  - "Marketing Analytics / Digital Analytics Assistant"
+  - "Marketing Analyst"
+  - "Digital Marketing Analyst"
+  - "Junior Digital Analytics Consultant"
+  - "Marketing Performance Analyst"
+  - "Growth Marketing Associate"
+  - "Junior Growth Marketer"
+  - "Growth Marketing Specialist"
+  - "Junior CRO / Conversion Optimization Specialist"
+  - "Marketing Automation Assistant / Junior CRM Automation Specialist"
+  - "Junior Ecommerce Marketing Specialist"
+  - "SEO and Content Operations Specialist"
+  - "Marketing Operations / MarTech Assistant"
+  - "Performance Marketing Manager"
 
 experience_range:
-  min_years: 1.0
-  max_years: 4.0
-  preferred_years: 2.0
+  min_years: 0.0
+  max_years: 3.0
+  preferred_years: 1.0
 
 location_preferences:
   work_modes:
@@ -19,34 +45,67 @@ location_preferences:
     - "Hybrid"
     - "On-site"
   preferred_cities:
-    - "Bengaluru"
-    - "Bangalore"
-    - "Mumbai"
-    - "Delhi NCR"
-    - "Gurugram"
-    - "Noida"
-    - "Hyderabad"
-    - "Pune"
+    # Priority 1: Top Metros (Tier 1)
+    - "Berlin"
+    - "Munich"
+    - "Hamburg"
+    # Priority 2: High Demand Regional Hubs
+    - "Düsseldorf"
+    - "Cologne"
+    - "Stuttgart"
+    - "Frankfurt"
+    - "Karlsruhe"
+    - "Mannheim"
+    # Metro Search Radius & Suburbs
+    - "Potsdam"
+    - "Neubiberg"
+    - "Sauerlach"
+    - "Gilching"
+    - "Ismaning"
+    - "Glinde"
+    - "Wedel"
+    - "Rosengarten"
+    - "Heidelberg"
+    - "Heilbronn"
+    - "Ulm"
+    - "Tübingen"
+    - "Eschborn"
+    - "Offenbach"
+    - "Mainz"
+    - "Wiesbaden"
+    - "Darmstadt"
+    - "Bremen"
+    - "Bielefeld"
+    - "Bonn"
+    - "Dortmund"
+    - "Leipzig"
+    - "Nuremberg"
+    - "Augsburg"
+  preferred_countries:
+    - "Germany"
+    - "Deutschland"
   relocation_willing: true
 
 compensation:
-  currency: "INR"
-  min_annual: 600000
-  target_annual: 1000000
-  notice_period_days: 30
+  currency: "EUR"
+  min_annual: 38000
+  target_annual: 48000
+  notice_period_days: 15
 
 key_domains:
   - "B2B SaaS"
   - "D2C / E-commerce"
-  - "B2C Tech"
+  - "Performance Marketing Agency"
+  - "B2B Software"
+  - "Tech Startups"
   - "Fintech"
-  - "Edtech"
 
 core_channels:
-  - "Google Ads (Search, PMax, Display, YouTube)"
-  - "Meta Ads (Facebook, Instagram)"
-  - "LinkedIn Ads"
+  - "Meta Ads (Instant Forms, Advantage+, Instagram, Facebook)"
+  - "Google Ads (Search, SEA, PPC)"
   - "Google Analytics 4 (GA4)"
   - "Google Tag Manager (GTM)"
   - "Conversion Rate Optimization (CRO)"
-  - "Attribution Modeling"
+  - "Marketing Automation (n8n, Apify, Gemini API)"
+  - "Funnel Analysis & Attribution"
+  - "Microsoft Clarity"

@@ -1,31 +1,55 @@
+{% if style == "de" %}
+# {{ sections.document_title }}
+
+# {{ candidate.full_name }}
+{{ candidate.headline }}
+
+---
+
+## {{ sections.personal_data }}
+{% if candidate.address %}- **Address:** {{ candidate.address }}
+{% endif %}
+{% if candidate.date_of_birth %}- **Date of Birth:** {{ candidate.date_of_birth }}
+{% endif %}
+- **Location:** {{ candidate.contact.location }}
+- **Email:** {{ candidate.contact.email }}
+- **Phone:** {{ candidate.contact.phone }}
+{% if candidate.contact.linkedin %}- **LinkedIn:** {{ candidate.contact.linkedin }}
+{% endif %}
+{% if candidate.contact.portfolio %}- **Portfolio:** {{ candidate.contact.portfolio }}
+{% endif %}
+{% if candidate.contact.github %}- **GitHub:** {{ candidate.contact.github }}
+{% endif %}
+{% else %}
 # {{ candidate.full_name }}
 {{ candidate.headline }}
 
 **Contact:** {{ candidate.contact.email }} | {{ candidate.contact.phone }} | {{ candidate.contact.location }}  
-**Profiles:** [LinkedIn]({{ candidate.contact.linkedin }}) | [Portfolio]({{ candidate.contact.portfolio }})
+**Profiles:** [LinkedIn]({{ candidate.contact.linkedin }}) | [Portfolio]({{ candidate.contact.portfolio }}){% if candidate.contact.github %} | [GitHub]({{ candidate.contact.github }}){% endif %}
+{% endif %}
 
 ---
 
-## Professional Summary
+## {{ sections.summary }}
 {{ tailored.summary }}
 
 ---
 
-## Core Competencies & Skills
+## {{ sections.skills }}
 {% if tailored.skills %}
 {{ tailored.skills | join(" • ") }}
 {% else %}
 {{ candidate.skills | join(" • ") }}
 {% endif %}
 
-**Platforms & Tools:** {{ candidate.tools | join(", ") }}
+**{{ sublabels.platforms_tools }}:** {{ candidate.tools | join(", ") }}
 
 ---
 
-## Professional Experience
+## {{ sections.experience }}
 {% for role in tailored.experience %}
 ### {{ role.title }} — {{ role.company }}
-*{{ role.location }} | {{ role.period }}*
+*{{ role.location }} | {{ period_overrides[loop.index0] }}*
 
 {% for bullet in role.bullets %}
 - {{ bullet }}
@@ -35,20 +59,20 @@
 
 ---
 
-## Key Achievements & Impact
+## {{ sections.achievements }}
 {% for ach in candidate.achievements %}
-- **{{ ach.metric }}:** {{ ach.statement }} *(Evidence: {{ ach.time_period }})*
+- **{{ ach.metric }}:** {{ ach.statement }} *({{ sublabels.evidence_prefix }}{{ ach.time_period }})*
 {% endfor %}
 
 ---
 
-## Education & Certifications
-### Education
+## {{ sections.education }}
+### {{ sublabels.education }}
 {% for edu in candidate.education %}
 - **{{ edu.degree }}** — {{ edu.institution }} ({{ edu.start_year }} - {{ edu.end_year }})
 {% endfor %}
 
-### Certifications
+### {{ sublabels.certifications }}
 {% for cert in candidate.certifications %}
 - **{{ cert.name }}** — {{ cert.issuer }} ({{ cert.date }})
 {% endfor %}

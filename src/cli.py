@@ -26,6 +26,9 @@ def cmd_check_env(args):
     print(f"Candidate Profile : {settings.candidate_profile_path} ({'Found' if settings.candidate_profile_path.exists() else 'Missing'})")
     print(f"Supabase Database : {settings.supabase_url or settings.database_url or 'Not configured (using memory)'}")
     print(f"Current LLM Mode  : {settings.llm_provider.upper()}")
+    from src.resume.sections import get_style
+    style = get_style()
+    print(f"Resume Style      : {style.upper()} ({'German Lebenslauf format' if style == 'de' else 'US/international format'})")
     print("-" * 65)
     print("CREDENTIALS STATUS:")
     for cred, is_set in status.items():

@@ -1,0 +1,39 @@
+{
+  "source": "arbeitnow",
+  "url": "https://www.arbeitnow.com/jobs/junior-performance-marketing-manager-berlin-102938",
+  "title": "Junior Performance Marketing Manager",
+  "company": "NextLevel Growth Berlin",
+  "location": "Berlin, Germany (Hybrid)",
+  "employment_type": "Full Time",
+  "experience_min": 1,
+  "experience_max": 3,
+  "salary": "EUR 40,000 - 48,000 PA",
+  "description_raw": "We are seeking a Junior Performance Marketing Manager to join our growth team in Berlin (hybrid or remote within Germany). You will manage paid acquisition across Meta Ads and Google Ads (SEA), set up and monitor conversion tracking via GA4 and GTM, perform landing page CRO and A/B tests, and automate marketing workflows. Fluency in English is required; German is a plus. Candidates with an approved German Opportunity Card (Chancenkarte) or valid work authorization are strongly encouraged to apply.",
+  "must_have_skills": [
+    "Performance Marketing",
+    "Meta Ads",
+    "Google Ads",
+    "GA4",
+    "GTM",
+    "Lead Generation"
+  ],
+  "nice_to_have_skills": [
+    "n8n",
+    "CRO",
+    "A/B Testing",
+    "Marketing Automation"
+  ],
+  "platforms_and_tools": [
+    "Meta Ads Manager",
+    "Google Ads",
+    "Google Analytics 4",
+    "Google Tag Manager",
+    "Microsoft Clarity"
+  ],
+  "responsibilities": [
+    "Plan, execute, and optimize paid social and search advertising campaigns.",
+    "Monitor CPL, CAC, and ROAS across campaigns with daily tracking.",
+    "Implement and audit tracking tags and conversion events using GA4 and GTM.",
+    "Collaborate on landing page A/B tests and ad copy variations."
+  ]
+}

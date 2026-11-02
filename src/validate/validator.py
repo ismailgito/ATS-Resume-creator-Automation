@@ -17,6 +17,12 @@ class ResumeValidator:
     def __init__(self, settings: Optional[AppSettings] = None):
         self.settings = settings or AppSettings()
         self.policy_config = load_yaml_config(self.settings.policy_config_path)
+        # Section labels follow the active resume style (de/us) so validation
+        # messages match the headings actually rendered in the documents.
+        from src.resume.sections import get_sections, get_style
+
+        self.style = get_style()
+        self.sections = get_sections(self.style)
 
     def validate(self, candidate: CandidateProfile, tailored: TailoredResume) -> ValidationReport:
         """Run all quality, ATS, and factuality checks."""
@@ -27,18 +33,18 @@ class ResumeValidator:
         readability_warnings: List[str] = []
         required_fixes: List[str] = []
 
-        # 1. Check Mandatory Sections
+        # 1. Check Mandatory Sections (labels sourced from active style)
         if not tailored.summary or len(tailored.summary.strip()) < 50:
-            missing_sections.append("Professional Summary is missing or too short (< 50 chars).")
+            missing_sections.append(f"{self.sections['summary']} is missing or too short (< 50 chars).")
 
         if not tailored.skills or len(tailored.skills) < 3:
-            missing_sections.append("Core Competencies & Skills section has fewer than 3 skills.")
+            missing_sections.append(f"{self.sections['skills']} section has fewer than 3 skills.")
 
         if not tailored.experience:
-            missing_sections.append("Professional Experience section is empty.")
+            missing_sections.append(f"{self.sections['experience']} section is empty.")
 
         if not candidate.education:
-            missing_sections.append("Education section is missing.")
+            missing_sections.append(f"{self.sections['education']} section is missing.")
 
         # 2. Check Contact Details
         if not candidate.contact.email or "@" not in candidate.contact.email:

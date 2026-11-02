@@ -2,12 +2,36 @@
 
 from __future__ import annotations
 
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.notifications import send_notification
+from src.notifications import send_notification, send_telegram
 from src.tracker.db import ApplicationTrackerDB
+
+
+def _env(**overrides: str):
+    """Env patch that blanks all notification channels, then applies overrides."""
+    base = {
+        "NOTIFY_WEBHOOK_URL": "",
+        "TELEGRAM_BOT_TOKEN": "",
+        "TELEGRAM_CHAT_ID": "",
+    }
+    base.update(overrides)
+    return patch.dict(os.environ, base, clear=False)
+
+
+@pytest.fixture(autouse=True)
+def _no_ambient_notification_config():
+    """Keep notification tests hermetic.
+
+    A developer's real ``.env`` could otherwise leak Telegram/webhook
+    credentials into assertions. Individual tests override these values
+    explicitly where needed.
+    """
+    with _env():
+        yield
 
 
 # ---------------------------------------------------------------------------
@@ -19,9 +43,8 @@ class TestSendNotification:
     """Tests for src.notifications.send_notification."""
 
     def test_returns_false_when_no_webhook_url(self):
-        """No webhook configured → silently returns False, does not raise."""
-        import os
-        with patch.dict(os.environ, {"NOTIFY_WEBHOOK_URL": ""}, clear=False):
+        """No webhook (and no Telegram) configured → silently returns False, does not raise."""
+        with _env():
             with patch("src.notifications._requests") as mock_req:
                 result = send_notification("hello")
         assert result is False
@@ -75,6 +98,139 @@ class TestSendNotification:
             notif_mod._requests = original
 
         assert result is False
+
+
+# ---------------------------------------------------------------------------
+# send_telegram tests
+# ---------------------------------------------------------------------------
+
+
+class TestSendTelegram:
+    """Tests for src.notifications.send_telegram."""
+
+    def test_returns_false_when_not_configured(self):
+        """No token/chat id → returns False and never hits the network."""
+        with _env():
+            with patch("src.notifications._requests") as mock_req:
+                result = send_telegram("hi")
+        assert result is False
+        mock_req.post.assert_not_called()
+
+    def test_returns_false_when_only_token_set(self):
+        """Token without chat id (or vice versa) is not a valid config."""
+        with _env(TELEGRAM_BOT_TOKEN="123:abc", TELEGRAM_CHAT_ID=""):
+            with patch("src.notifications._requests") as mock_req:
+                result = send_telegram("hi")
+        assert result is False
+        mock_req.post.assert_not_called()
+
+    def test_posts_to_bot_api_and_returns_true_on_200(self):
+        """Explicit credentials → POSTs to sendMessage with chat_id + text."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+
+        with patch("src.notifications._requests") as mock_req:
+            mock_req.post.return_value = mock_resp
+            result = send_telegram(
+                "✅ Done", bot_token="123:abc", chat_id="42"
+            )
+
+        assert result is True
+        mock_req.post.assert_called_once()
+        call_args = mock_req.post.call_args
+        url = call_args.args[0]
+        assert url == "https://api.telegram.org/bot123:abc/sendMessage"
+        payload = call_args.kwargs.get("json") or call_args.args[1]
+        assert payload == {"chat_id": "42", "text": "✅ Done"}
+
+    def test_reads_credentials_from_settings(self):
+        """When explicit args are omitted, credentials come from AppSettings."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+
+        with _env(TELEGRAM_BOT_TOKEN="999:xyz", TELEGRAM_CHAT_ID="777"):
+            with patch("src.notifications._requests") as mock_req:
+                mock_req.post.return_value = mock_resp
+                result = send_telegram("from settings")
+
+        assert result is True
+        url = mock_req.post.call_args.args[0]
+        assert "bot999:xyz" in url
+
+    def test_returns_false_on_http_error(self):
+        """Non-2xx Telegram response → False without raising."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 400
+        mock_resp.text = "Bad Request: chat not found"
+
+        with patch("src.notifications._requests") as mock_req:
+            mock_req.post.return_value = mock_resp
+            result = send_telegram("msg", bot_token="123:abc", chat_id="42")
+
+        assert result is False
+
+    def test_returns_false_on_network_error(self):
+        """Network exception is caught; returns False without raising."""
+        with patch("src.notifications._requests") as mock_req:
+            mock_req.post.side_effect = ConnectionError("timeout")
+            result = send_telegram("msg", bot_token="123:abc", chat_id="42")
+
+        assert result is False
+
+
+class TestSendNotificationTelegramChannel:
+    """send_notification must fan out to Telegram when configured."""
+
+    def test_telegram_only_fires_and_returns_true(self):
+        """Telegram configured (no webhook) → sendMessage called, returns True."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+
+        with _env(TELEGRAM_BOT_TOKEN="123:abc", TELEGRAM_CHAT_ID="42"):
+            with patch("src.notifications._requests") as mock_req:
+                mock_req.post.return_value = mock_resp
+                result = send_notification("batch done")
+
+        assert result is True
+        mock_req.post.assert_called_once()
+        url = mock_req.post.call_args.args[0]
+        assert "api.telegram.org" in url
+
+    def test_fires_both_channels_when_both_configured(self):
+        """Webhook + Telegram → one POST per channel; True if any delivered."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+
+        with _env(
+            NOTIFY_WEBHOOK_URL="https://hooks.example.com/notify",
+            TELEGRAM_BOT_TOKEN="123:abc",
+            TELEGRAM_CHAT_ID="42",
+        ):
+            with patch("src.notifications._requests") as mock_req:
+                mock_req.post.return_value = mock_resp
+                result = send_notification("both channels")
+
+        assert result is True
+        assert mock_req.post.call_count == 2
+
+    def test_returns_true_when_webhook_fails_but_telegram_succeeds(self):
+        """One failing channel must not lose the message if Telegram works."""
+        webhook_resp = MagicMock()
+        webhook_resp.status_code = 500
+        webhook_resp.text = "boom"
+        telegram_resp = MagicMock()
+        telegram_resp.status_code = 200
+
+        with _env(
+            NOTIFY_WEBHOOK_URL="https://hooks.example.com/notify",
+            TELEGRAM_BOT_TOKEN="123:abc",
+            TELEGRAM_CHAT_ID="42",
+        ):
+            with patch("src.notifications._requests") as mock_req:
+                mock_req.post.side_effect = [webhook_resp, telegram_resp]
+                result = send_notification("must not be lost")
+
+        assert result is True
 
 
 # ---------------------------------------------------------------------------

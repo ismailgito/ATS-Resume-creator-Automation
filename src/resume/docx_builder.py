@@ -8,19 +8,34 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from src.models.profile import CandidateProfile
 from src.models.resume import TailoredResume
+from src.resume.sections import format_period, get_sections, get_style, get_sub_labels
 
 
 def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, output_path: Path) -> Path:
     """Generate ATS-optimized Word document (.docx)."""
+    style = get_style()
+    sections = get_sections(style)
+    sublabels = get_sub_labels(style)
+
     doc = Document()
 
     # Set 0.75 - 1.0 inch standard margins
-    sections = doc.sections
-    for section in sections:
+    sections_obj = doc.sections
+    for section in sections_obj:
         section.top_margin = Inches(0.75)
         section.bottom_margin = Inches(0.75)
         section.left_margin = Inches(0.75)
         section.right_margin = Inches(0.75)
+
+    # German Lebenslauf: document title above the name
+    if style == "de" and sections["document_title"]:
+        doc_title_p = doc.add_paragraph()
+        doc_title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        doc_title_run = doc_title_p.add_run(sections["document_title"])
+        doc_title_run.font.name = "Calibri"
+        doc_title_run.font.size = Pt(14)
+        doc_title_run.font.bold = True
+        doc_title_run.font.color.rgb = RGBColor(16, 44, 87)
 
     # Candidate Name (Header)
     title_p = doc.add_paragraph()
@@ -40,18 +55,6 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
     sub_run.font.italic = True
     sub_run.font.color.rgb = RGBColor(70, 80, 95)
 
-    # Contact Details
-    contact_p = doc.add_paragraph()
-    contact_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    contact_text = (
-        f"{candidate.contact.email}  |  {candidate.contact.phone}  |  {candidate.contact.location}\n"
-        f"LinkedIn: {candidate.contact.linkedin}  |  Portfolio: {candidate.contact.portfolio}"
-    )
-    contact_run = contact_p.add_run(contact_text)
-    contact_run.font.name = "Calibri"
-    contact_run.font.size = Pt(9.5)
-    contact_run.font.color.rgb = RGBColor(80, 80, 80)
-
     def add_section_header(title: str):
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(10)
@@ -62,16 +65,63 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
         run.font.bold = True
         run.font.color.rgb = RGBColor(16, 44, 87)
 
-    # 1. Professional Summary
-    add_section_header("Professional Summary")
+    def add_label_line(label: str, value: str):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after = Pt(1)
+        label_run = p.add_run(f"{label}: ")
+        label_run.bold = True
+        label_run.font.name = "Calibri"
+        label_run.font.size = Pt(9.5)
+        value_run = p.add_run(value)
+        value_run.font.name = "Calibri"
+        value_run.font.size = Pt(9.5)
+
+    # ── Personal data block (German style only, only when fields are filled) ──
+    if style == "de":
+        personal_rows = []
+        if candidate.address:
+            personal_rows.append(("Address", candidate.address))
+        if candidate.date_of_birth:
+            personal_rows.append(("Date of Birth", candidate.date_of_birth))
+        if candidate.photo:
+            personal_rows.append(("Photo", candidate.photo))
+        personal_rows.append(("Location", candidate.contact.location))
+        personal_rows.append(("Email", candidate.contact.email))
+        personal_rows.append(("Phone", candidate.contact.phone))
+        if candidate.contact.linkedin:
+            personal_rows.append(("LinkedIn", candidate.contact.linkedin))
+        if candidate.contact.portfolio:
+            personal_rows.append(("Portfolio", candidate.contact.portfolio))
+        if candidate.contact.github:
+            personal_rows.append(("GitHub", candidate.contact.github))
+
+        add_section_header(sections["personal_data"])
+        for label, value in personal_rows:
+            if value:
+                add_label_line(label, value)
+    else:
+        # Contact Details (US style)
+        contact_p = doc.add_paragraph()
+        contact_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        contact_text = (
+            f"{candidate.contact.email}  |  {candidate.contact.phone}  |  {candidate.contact.location}\n"
+            f"LinkedIn: {candidate.contact.linkedin}  |  Portfolio: {candidate.contact.portfolio}"
+        )
+        contact_run = contact_p.add_run(contact_text)
+        contact_run.font.name = "Calibri"
+        contact_run.font.size = Pt(9.5)
+        contact_run.font.color.rgb = RGBColor(80, 80, 80)
+
+    # 1. Summary
+    add_section_header(sections["summary"])
     sum_p = doc.add_paragraph()
     sum_p.paragraph_format.space_after = Pt(6)
     sum_run = sum_p.add_run(tailored.summary)
     sum_run.font.name = "Calibri"
     sum_run.font.size = Pt(10)
 
-    # 2. Core Competencies & Skills
-    add_section_header("Core Competencies & Skills")
+    # 2. Skills
+    add_section_header(sections["skills"])
     skills_p = doc.add_paragraph()
     skills_p.paragraph_format.space_after = Pt(4)
     skills_run = skills_p.add_run(" • ".join(tailored.skills))
@@ -80,7 +130,7 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
 
     tools_p = doc.add_paragraph()
     tools_p.paragraph_format.space_after = Pt(6)
-    tools_label = tools_p.add_run("Platforms & Tools: ")
+    tools_label = tools_p.add_run(f"{sublabels['platforms_tools']}: ")
     tools_label.bold = True
     tools_label.font.name = "Calibri"
     tools_label.font.size = Pt(9.5)
@@ -88,8 +138,8 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
     tools_val.font.name = "Calibri"
     tools_val.font.size = Pt(9.5)
 
-    # 3. Professional Experience
-    add_section_header("Professional Experience")
+    # 3. Experience
+    add_section_header(sections["experience"])
     for role in tailored.experience:
         role_p = doc.add_paragraph()
         role_p.paragraph_format.space_before = Pt(4)
@@ -102,7 +152,7 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
 
         meta_p = doc.add_paragraph()
         meta_p.paragraph_format.space_after = Pt(2)
-        meta_r = meta_p.add_run(f"{role.location}  |  {role.period}")
+        meta_r = meta_p.add_run(f"{role.location}  |  {format_period(role.period, style)}")
         meta_r.font.name = "Calibri"
         meta_r.font.size = Pt(9)
         meta_r.font.italic = True
@@ -115,8 +165,8 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
             b_run.font.name = "Calibri"
             b_run.font.size = Pt(9.5)
 
-    # 4. Key Achievements & Impact
-    add_section_header("Key Achievements & Track Record")
+    # 4. Achievements
+    add_section_header(sections["achievements"])
     for ach in candidate.achievements:
         ach_p = doc.add_paragraph(style="List Bullet")
         ach_p.paragraph_format.space_after = Pt(2)
@@ -129,7 +179,7 @@ def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, out
         s_run.font.size = Pt(9.5)
 
     # 5. Education & Certifications
-    add_section_header("Education & Certifications")
+    add_section_header(sections["education"])
     for edu in candidate.education:
         edu_p = doc.add_paragraph(style="List Bullet")
         edu_p.paragraph_format.space_after = Pt(1)

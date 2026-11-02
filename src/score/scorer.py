@@ -133,20 +133,27 @@ class MatchScorer:
         """Score job title alignment with candidate target roles."""
         jt = job_title.lower()
 
-        # Check for completely irrelevant roles (software engineer, sales, legal, etc.)
+        # Check for completely irrelevant roles (software engineer, devops, legal, etc.)
         irrelevant_tokens = {"java", "backend", "frontend", "devops", "kubernetes", "golang", "c++", "mechanical"}
         title_tokens = set(re.findall(r"\w+", jt))
         if irrelevant_tokens.intersection(title_tokens):
             return 0.0
 
+        # Combine candidate target roles and target config roles
+        target_roles = list(candidate.target_roles) + self.target_config.get("target_roles", [])
+
         # Direct exact or substring match with target roles
-        for role in candidate.target_roles:
+        for role in target_roles:
             r_lower = role.lower()
             if r_lower in jt or jt in r_lower:
                 return 100.0
 
         # Partial token match for marketing roles
-        marketing_tokens = {"performance", "digital", "growth", "paid", "ppc", "media", "acquisition", "sem", "marketing"}
+        marketing_tokens = {
+            "performance", "digital", "growth", "paid", "ppc", "sea",
+            "media", "acquisition", "sem", "marketing", "analytics", "cro",
+            "trainee", "associate", "specialist", "assistant"
+        }
         overlap = marketing_tokens.intersection(title_tokens)
 
         if len(overlap) >= 2:
@@ -164,37 +171,37 @@ class MatchScorer:
         missing = []
         candidate_corpus = [s.lower() for s in (candidate.skills + candidate.tools)]
 
-        for req in required_skills:
-            req_l = req.lower()
+        for skill in required_skills:
+            skill_l = skill.lower()
             is_matched = False
 
             # Direct match
-            if req_l in candidate_corpus:
-                matched.append(req)
+            if skill_l in candidate_corpus:
+                matched.append(skill)
                 continue
 
-            # Synonym match
+            # Substring check
+            if any(skill_l in c or c in skill_l for c in candidate_corpus):
+                matched.append(skill)
+                continue
+
+            # Synonym group check
             for group, syns in self.synonyms.items():
                 syns_lower = [s.lower() for s in syns]
-                if req_l in syns_lower:
+                if skill_l in syns_lower:
                     if any(s in candidate_corpus or any(s in c for c in candidate_corpus) for s in syns_lower):
-                        matched.append(req)
+                        matched.append(skill)
                         is_matched = True
                         break
-            if is_matched:
-                continue
 
-            # Substring match
-            if any(req_l in c or c in req_l for c in candidate_corpus):
-                matched.append(req)
-            else:
-                missing.append(req)
+            if not is_matched:
+                missing.append(skill)
 
         match_ratio = len(matched) / len(required_skills)
         return match_ratio * 100.0, matched, missing
 
     def _score_tools(self, required_tools: List[str], candidate: CandidateProfile) -> Tuple[float, List[str], List[str]]:
-        """Score platform and tool alignment."""
+        """Score platform & tools match against candidate tools registry."""
         if not required_tools:
             return 85.0, [], []
 
@@ -239,7 +246,7 @@ class MatchScorer:
                 return 100.0
             if candidate_years < exp_min:
                 diff = exp_min - candidate_years
-                return max(0.0, 100.0 - (diff * 30.0))
+                return max(0.0, 100.0 - (diff * 25.0))
             if candidate_years > exp_max:
                 diff = candidate_years - exp_max
                 return max(50.0, 100.0 - (diff * 15.0))
@@ -248,38 +255,60 @@ class MatchScorer:
             if candidate_years >= exp_min:
                 return 100.0
             diff = exp_min - candidate_years
-            return max(0.0, 100.0 - (diff * 35.0))
+            return max(0.0, 100.0 - (diff * 25.0))
 
         return 85.0
 
     def _score_industry(self, job: ParsedJob, candidate: CandidateProfile) -> float:
-        """Score industry relevance (B2C, D2C, B2B SaaS)."""
+        """Score industry relevance (B2C, D2C, B2B SaaS, Agency)."""
         jt_desc = f"{job.title} {job.company} {' '.join(job.responsibilities)}".lower()
-        relevant_domains = ["ecommerce", "e-commerce", "d2c", "b2b", "saas", "fintech", "edtech", "agency", "tech", "growth"]
+        relevant_domains = ["ecommerce", "e-commerce", "d2c", "b2b", "saas", "fintech", "edtech", "agency", "tech", "growth", "software"]
         matches = [d for d in relevant_domains if d in jt_desc]
         if matches:
             return 95.0
         return 75.0
 
     def _score_location(self, job_loc: str, candidate: CandidateProfile) -> float:
-        """Score location and remote / hybrid fit."""
+        """Score location and remote / hybrid fit according to preferred target locations."""
         if not job_loc:
             return 85.0
         loc_l = job_loc.lower()
-        if "remote" in loc_l or "hybrid" in loc_l or "bengaluru" in loc_l or "bangalore" in loc_l:
+
+        # Remote / hybrid work modes always achieve top score
+        if "remote" in loc_l or "hybrid" in loc_l:
             return 100.0
-        pref_cities = ["mumbai", "delhi", "gurugram", "noida", "pune", "hyderabad"]
+
+        # Match preferred cities from target config
+        pref_cities = [c.lower() for c in self.target_config.get("location_preferences", {}).get("preferred_cities", [])]
+        if not pref_cities:
+            pref_cities = [
+                "berlin", "munich", "hamburg", "düsseldorf", "cologne", "stuttgart",
+                "frankfurt", "karlsruhe", "mannheim", "bengaluru", "mumbai"
+            ]
+
+        # Top target cities (Berlin, Munich, Hamburg, etc.) or candidate location match
         if any(c in loc_l for c in pref_cities):
+            return 100.0
+
+        # Preferred country matches (Germany / Deutschland)
+        pref_countries = [c.lower() for c in self.target_config.get("location_preferences", {}).get("preferred_countries", ["germany", "deutschland"])]
+        if any(cnt in loc_l for cnt in pref_countries):
+            return 95.0
+
+        # Also support Bengaluru / Mumbai / India from existing samples or candidate origin
+        if any(c in loc_l for c in ["bengaluru", "bangalore", "chennai", "mumbai", "india"]):
             return 90.0
+
         return 65.0
 
     def _score_achievements(self, job: ParsedJob, candidate: CandidateProfile) -> float:
         """Score relevance of candidate achievements to required job outcomes."""
         all_job_text = f"{' '.join(job.must_have_skills)} {' '.join(job.platforms_and_tools)} {' '.join(job.responsibilities)}".lower()
         relevant_count = 0
+        search_terms = ["roas", "cpl", "cac", "google", "meta", "ga4", "gtm", "scale", "cro", "lead", "n8n", "ads", "seo", "acquisition", "campaign", "clarity"]
         for ach in candidate.achievements:
             ach_text = f"{ach.statement} {ach.metric}".lower()
-            if any(k in ach_text and k in all_job_text for k in ["roas", "cac", "google", "meta", "ga4", "gtm", "scale", "cro"]):
+            if any(k in ach_text and k in all_job_text for k in search_terms):
                 relevant_count += 1
         ratio = relevant_count / max(1, len(candidate.achievements))
         return min(100.0, 70.0 + (ratio * 30.0))
@@ -287,7 +316,7 @@ class MatchScorer:
     def _check_negative_constraints(self, job: ParsedJob, candidate: CandidateProfile) -> List[str]:
         """Check whether the job strictly demands prohibited / unheld skills."""
         flags = []
-        job_full_text = f"{job.title} {' '.join(job.must_have_skills)} {' '.join(job.platforms_and_tools)}".lower()
+        job_full_text = f"{job.title} {' '.join(job.must_have_skills)} {' '.join(job.platforms_and_tools)} {' '.join(job.responsibilities)} {' '.join(job.keywords)}".lower()
 
         for constraint in candidate.negative_constraints:
             c_lower = constraint.lower()
@@ -302,5 +331,11 @@ class MatchScorer:
 
         if job.experience_min and job.experience_min >= 5.0 and candidate.experience_years <= 3.0:
             flags.append(f"Seniority gap: Job requires {job.experience_min}+ yrs experience; candidate has {candidate.experience_years} yrs")
+
+        # Fluent German requirement check
+        if any("fluent german" in c.lower() or "german" in c.lower() for c in candidate.negative_constraints):
+            german_c2_tokens = ["fluent german", "c1 german", "c2 german", "verhandlungssichere deutschkenntnisse", "deutsch fließend"]
+            if any(tok in job_full_text for tok in german_c2_tokens):
+                flags.append("Violates constraint: Job requires fluent/native German, but candidate is beginner (A1)")
 
         return flags

@@ -13,6 +13,7 @@ class ContactInfo:
     location: str
     linkedin: str = ""
     portfolio: str = ""
+    github: str = ""
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> ContactInfo:
@@ -22,6 +23,7 @@ class ContactInfo:
             location=data.get("location", ""),
             linkedin=data.get("linkedin", ""),
             portfolio=data.get("portfolio", ""),
+            github=data.get("github", ""),
         )
 
 
@@ -125,6 +127,10 @@ class CandidateProfile:
     notice_period_days: int = 30
     current_ctc_lpa: Optional[float] = None
     expected_ctc_lpa: Optional[float] = None
+    # Optional German Lebenslauf "Persönliche Daten" fields (rendered only when filled)
+    date_of_birth: str = ""
+    address: str = ""
+    photo: str = ""
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> CandidateProfile:
@@ -149,6 +155,9 @@ class CandidateProfile:
             notice_period_days=data.get("notice_period_days", 30),
             current_ctc_lpa=data.get("current_ctc_lpa"),
             expected_ctc_lpa=data.get("expected_ctc_lpa"),
+            date_of_birth=data.get("date_of_birth", ""),
+            address=data.get("address", ""),
+            photo=data.get("photo", ""),
         )
 
     def to_fact_registry(self) -> Dict[str, Any]:

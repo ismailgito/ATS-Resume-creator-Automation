@@ -14,14 +14,16 @@
     "reject_on_negative_constraints": true
   },
   "ats_formatting": {
+    "resume_style": "de",
     "max_pages_junior_mid": 1,
     "max_pages_senior": 2,
     "allowed_sections": [
-      "Professional Summary",
-      "Core Competencies & Skills",
-      "Professional Experience",
-      "Key Projects & Campaigns",
-      "Education & Certifications"
+      "Persönliche Daten",
+      "Kurzprofil",
+      "Kenntnisse & Fähigkeiten",
+      "Berufserfahrung",
+      "Erfolge & Wirkung",
+      "Ausbildung & Zertifikate"
     ],
     "prohibited_elements": [
       "tables_with_nested_cells",

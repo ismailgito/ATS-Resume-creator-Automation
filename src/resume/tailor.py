@@ -88,11 +88,14 @@ class ResumeTailor:
 
     def _build_tailored_summary(self, job: ParsedJob, candidate: CandidateProfile) -> str:
         """Construct factual tailored summary directly from candidate facts."""
+        tools_str = ", ".join(candidate.tools[:3]) if candidate.tools else "performance advertising tools"
+        target_role = candidate.target_roles[0] if candidate.target_roles else "Performance Marketer"
+        first_fact = candidate.summary_facts[0] if candidate.summary_facts else ""
         return (
-            f"Results-driven {candidate.target_roles[0]} with {candidate.experience_years} years of proven expertise "
-            f"scaling paid acquisition across {', '.join(candidate.tools[:3])}. Track record of managing significant "
-            f"monthly advertising budgets while optimizing blended ROAS to 3.8x and slashing CAC by 32%. "
-            f"Skilled in GA4 server-side measurement, GTM, and rapid A/B experimentation to drive sustainable business growth."
+            f"Results-driven {target_role} with hands-on expertise "
+            f"executing performance advertising and lead acquisition across {tools_str}. "
+            f"{first_fact} Skilled in GA4 and GTM conversion tracking, CPL and ROAS optimization, "
+            f"and marketing automation to drive measurable pipeline growth."
         )
 
     def _build_tailored_skills(self, job: ParsedJob, candidate: CandidateProfile) -> List[str]:
@@ -115,14 +118,10 @@ class ResumeTailor:
         for emp in candidate.employment:
             bullets = list(emp.responsibilities)
 
-            # If current role, prepend relevant candidate achievements as evidence bullets
-            if emp.is_current:
-                top_achievements = [
-                    f"Scaled advertising budgets from INR 8L to INR 25L/month while boosting blended ROAS from 2.6x to 3.8x across Google & Meta Ads.",
-                    f"Reduced blended CAC by 32% via structured search query sculpting, negative keywords, and PMax asset group redesign.",
-                    f"Engineered full server-side GA4 and GTM tracking container, recovering 18% previously unrecorded conversions via Meta CAPI.",
-                ]
-                bullets = top_achievements + bullets
+            # Prepend top candidate achievements as evidence bullets for recent/primary role
+            if emp.is_current or (candidate.employment and emp == candidate.employment[0]):
+                top_achievements = [ach.statement for ach in candidate.achievements[:2]]
+                bullets = [a for a in top_achievements if a not in bullets] + bullets
 
             roles.append(
                 ResumeRole(
@@ -136,13 +135,30 @@ class ResumeTailor:
         return roles
 
     def _generate_cover_note(self, job: ParsedJob, candidate: CandidateProfile, match_report: MatchReport) -> Dict[str, Any]:
-        """Generate tailored cover note."""
+        """Generate tailored cover note.
+
+        The wrapper (Betreff/subject, greeting, sign-off) follows the active resume
+        style; body content stays in English (default tailoring language).
+        """
+        from src.resume.sections import get_sub_labels, get_style
+
+        style = get_style()
+        sublabels = get_sub_labels(style)
         try:
             prompt_template = load_prompt_template("cover-note")
-            system_prompt = (
-                "Write a short professional cover note for a job application. Use only verified candidate facts. "
-                "Keep it specific to the role and under 180 words. Return JSON: {subject, body, claims_used}."
-            )
+            if style == "de":
+                system_prompt = (
+                    "Write a short professional cover note for a job application. Use only verified candidate facts. "
+                    "Keep it specific to the role and under 180 words. "
+                    "The body must be written in English. The subject line must follow the German "
+                    "application convention: 'Bewerbung als <job title> - <company>'. "
+                    "Return JSON: {subject, body, claims_used}."
+                )
+            else:
+                system_prompt = (
+                    "Write a short professional cover note for a job application. Use only verified candidate facts. "
+                    "Keep it specific to the role and under 180 words. Return JSON: {subject, body, claims_used}."
+                )
             user_prompt = render_prompt(
                 prompt_template,
                 {
@@ -157,21 +173,27 @@ class ResumeTailor:
         except Exception as e:
             logger.warning(f"LLM cover note generation fallback: {e}")
 
-        # Deterministic fallback cover note
+        # Deterministic fallback cover note (English body; style-aware subject line)
+        lead_ach = candidate.achievements[0].statement if candidate.achievements else "hands-on campaign management"
+        tools_str = ", ".join(candidate.tools[:3]) if candidate.tools else "performance advertising tools"
+        target_role = candidate.target_roles[0] if candidate.target_roles else "Performance Marketer"
+        if style == "de":
+            subject = f"Bewerbung als {job.title} - {job.company}"
+        else:
+            subject = f"Application for {job.title} - {candidate.full_name}"
         return {
-            "subject": f"Application for {job.title} - {candidate.full_name}",
+            "subject": subject,
             "body": (
                 f"I am writing to express my strong interest in the {job.title} position at {job.company}. "
-                f"With {candidate.experience_years} years of hands-on performance marketing experience, I have managed "
-                f"monthly ad budgets exceeding INR 25 Lakhs across Google Ads and Meta Ads, scaling revenue by 140% at a "
-                f"3.8x blended ROAS while reducing CAC by 32%. My technical expertise with GA4 server-side tracking, GTM, "
-                f"and iterative creative testing directly aligns with your team's objectives. "
-                f"I would welcome the opportunity to discuss how I can contribute to {job.company}'s growth."
+                f"As a {target_role} with practical experience across {tools_str}, "
+                f"I specialize in paid acquisition execution, GA4/GTM tracking, and automated ad workflows. "
+                f"In my recent work, I {lead_ach.lower() if lead_ach.startswith('Helped') else lead_ach} "
+                f"My background in end-to-end campaign tracking and continuous A/B optimization directly aligns "
+                f"with {job.company}'s growth goals. I would welcome the opportunity to discuss how I can contribute."
             ),
             "claims_used": [
-                f"{candidate.experience_years} years performance marketing experience",
-                "Managed monthly ad spend exceeding INR 25L",
-                "140% revenue scale at 3.8x ROAS and 32% CAC reduction",
-                "GA4 server-side and GTM implementation",
+                f"{candidate.full_name} - {target_role}",
+                lead_ach,
+                f"Tracking and automation with {tools_str}",
             ],
         }
