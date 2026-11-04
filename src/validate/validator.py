@@ -8,7 +8,10 @@ from typing import List, Optional
 from src.config import AppSettings, load_yaml_config
 from src.models.profile import CandidateProfile
 from src.models.resume import TailoredResume, ValidationReport
+from src.resume.sections import get_sections
+from src.resume.skill_utils import dedupe_skills
 from src.validate.fact_checker import FactChecker
+from src.validate.human_tone import dash_count, find_ai_tells, repeated_openers
 
 
 class ResumeValidator:
@@ -17,12 +20,9 @@ class ResumeValidator:
     def __init__(self, settings: Optional[AppSettings] = None):
         self.settings = settings or AppSettings()
         self.policy_config = load_yaml_config(self.settings.policy_config_path)
-        # Section labels follow the active resume style (de/us) so validation
-        # messages match the headings actually rendered in the documents.
-        from src.resume.sections import get_sections, get_style
-
-        self.style = get_style()
-        self.sections = get_sections(self.style)
+        # Section labels come from the German Lebenslauf so validation messages match
+        # the headings actually rendered in the documents.
+        self.sections = get_sections()
 
     def validate(self, candidate: CandidateProfile, tailored: TailoredResume) -> ValidationReport:
         """Run all quality, ATS, and factuality checks."""
@@ -74,7 +74,16 @@ class ResumeValidator:
             if count >= 12:
                 keyword_stuffing_warnings.append(f"Word '{word}' repeats {count} times (possible keyword stuffing).")
 
-        # 5. Format & Layout Warnings
+        redundant = [s for s in tailored.skills if s not in dedupe_skills(tailored.skills)]
+        if redundant:
+            keyword_stuffing_warnings.append(
+                f"Skills repeat each other: {', '.join(redundant)} (already covered by a longer skill)."
+            )
+
+        # 5. Human-writing check (advisory): stock phrases, repeated openers, dash overuse
+        readability_warnings.extend(self._human_tone_warnings(tailored))
+
+        # 6. Format & Layout Warnings
         if "{{" in combined_text or "}}" in combined_text:
             ats_warnings.append("Raw template syntax detected in text output.")
 
@@ -96,3 +105,33 @@ class ResumeValidator:
             readability_warnings=readability_warnings,
             required_fixes=required_fixes,
         )
+
+    @staticmethod
+    def _human_tone_warnings(tailored: TailoredResume) -> List[str]:
+        """Flag wording that reads as machine-written. Warnings only, never blocking."""
+        warnings: List[str] = []
+
+        for label, text in [("Summary", tailored.summary)] + [
+            (f"Bullet at {role.company}", bullet) for role in tailored.experience for bullet in role.bullets
+        ]:
+            tells = find_ai_tells(text)
+            if tells:
+                warnings.append(f"{label} uses stock phrases: {', '.join(tells)}.")
+
+        for role in tailored.experience:
+            openers = repeated_openers(role.bullets)
+            if openers:
+                warnings.append(
+                    f"Role at {role.company}: several bullets start with the same word ({', '.join(openers)})."
+                )
+
+        prose = " ".join([tailored.summary] + [b for r in tailored.experience for b in r.bullets])
+        if dash_count(prose) > 2:
+            warnings.append("Many em/en dashes in running text; use commas or full stops instead.")
+
+        if len(tailored.summary.split()) > 90:
+            warnings.append("Summary is longer than 90 words; a Kurzprofil should fit in about four lines.")
+        if re.search(r"I", tailored.summary):
+            warnings.append("Summary uses 'I'; German CVs leave out the pronoun.")
+
+        return warnings

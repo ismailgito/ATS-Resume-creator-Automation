@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from src.config import AppSettings, load_candidate_profile
 from src.ingest.job_sources import IngestionManager
+from src.llm.guard import get_guard
 from src.models.job import JobRecord, ParsedJob
 from src.models.profile import CandidateProfile
 from src.models.resume import ReviewPackage, TailoredResume, ValidationReport
@@ -37,6 +38,9 @@ class ResumeAutomationPipeline:
         self.scorer = MatchScorer(settings=self.settings)
         self.tailor_engine = ResumeTailor(settings=self.settings)
         self.validator = ResumeValidator(settings=self.settings)
+        # Tracks whether each resume was written with the LLM or in offline mode
+        self.guard = get_guard(self.settings)
+        self.last_generation_mode = ""
 
     def load_profile(self) -> CandidateProfile:
         """Load candidate profile from configured path."""
@@ -57,6 +61,7 @@ class ResumeAutomationPipeline:
         Sends a webhook notification when the limit is reached or if processing
         fails mid-workflow (``NOTIFY_WEBHOOK_URL`` env var).
         """
+        self.guard.start_resume()
         try:
             match_report, review_pkg = self._process_job_inner(
                 job_record, candidate=candidate, force_generate=force_generate
@@ -65,7 +70,11 @@ class ResumeAutomationPipeline:
             err_msg = f"❌ Workflow stopped with error: {exc}"
             logger.error(err_msg)
             send_notification(err_msg)
+            self.guard.finish_resume(counted=False)
             raise
+
+        # How this resume was written (a job that was skipped does not count as a resume)
+        self.last_generation_mode = self.guard.finish_resume(counted=review_pkg is not None)
 
         # Increment daily completion counter & notify if limit reached
         # (only when a full review package was generated, i.e. not skipped)
@@ -73,8 +82,10 @@ class ResumeAutomationPipeline:
             daily_limit = self.settings.daily_limit
             today_count = self.db.increment_completion(daily_limit=daily_limit)
             if today_count >= daily_limit:
+                totals = self.guard.status()
                 notify_msg = (
-                    f"✅ {today_count} resumes completed for today – daily limit of {daily_limit} reached."
+                    f"✅ {today_count} resumes completed for today – daily limit of {daily_limit} reached "
+                    f"({totals['llm_resumes']} with LLM, {totals['offline_resumes']} offline)."
                 )
                 logger.info(notify_msg)
                 send_notification(notify_msg)
@@ -157,7 +168,8 @@ class ResumeAutomationPipeline:
         with open(change_log_path, "w", encoding="utf-8") as f:
             f.write(f"# Resume Tailoring Log for {job_record.title} at {job_record.company}\n\n")
             f.write(f"**Version ID:** {tailored.resume_version_id}\n")
-            f.write(f"**Match Score:** {match_report.overall_score}/100\n\n")
+            f.write(f"**Match Score:** {match_report.overall_score}/100\n")
+            f.write(f"**Generated with:** {self.guard.current_mode()}\n\n")
             f.write("## Adaptations Made:\n")
             for item in tailored.change_log:
                 f.write(f"- {item}\n")

@@ -14,19 +14,19 @@ factuality:
   reject_on_negative_constraints: true
 
 ats_formatting:
-  # Resume style: "de" = German Lebenslauf format (default), "us" = classic US/international.
-  # Env var RESUME_STYLE overrides this value when set.
-  resume_style: "de"
-  max_pages_junior_mid: 1
+  # The only output format is the German (Berlin-style) Lebenslauf with English text.
+  max_pages_junior_mid: 2
   max_pages_senior: 2
-  # Section headings for the active style (de). Kept in sync with src/resume/sections.py.
+  # Section headings. Kept in sync with src/resume/sections.py.
   allowed_sections:
     - "Persönliche Daten"
     - "Kurzprofil"
-    - "Kenntnisse & Fähigkeiten"
     - "Berufserfahrung"
-    - "Erfolge & Wirkung"
-    - "Ausbildung & Zertifikate"
+    - "Ausbildung"
+    - "Projekte"
+    - "Weiterbildung & Zertifikate"
+    - "Kenntnisse"
+    - "Sprachkenntnisse"
   prohibited_elements:
     - "tables_with_nested_cells"
     - "multi_column_floaters"

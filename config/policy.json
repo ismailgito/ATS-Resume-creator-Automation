@@ -14,16 +14,17 @@
     "reject_on_negative_constraints": true
   },
   "ats_formatting": {
-    "resume_style": "de",
-    "max_pages_junior_mid": 1,
+    "max_pages_junior_mid": 2,
     "max_pages_senior": 2,
     "allowed_sections": [
       "Persönliche Daten",
       "Kurzprofil",
-      "Kenntnisse & Fähigkeiten",
       "Berufserfahrung",
-      "Erfolge & Wirkung",
-      "Ausbildung & Zertifikate"
+      "Ausbildung",
+      "Projekte",
+      "Weiterbildung & Zertifikate",
+      "Kenntnisse",
+      "Sprachkenntnisse"
     ],
     "prohibited_elements": [
       "tables_with_nested_cells",

@@ -129,8 +129,12 @@ class CandidateProfile:
     expected_ctc_lpa: Optional[float] = None
     # Optional German Lebenslauf "Persönliche Daten" fields (rendered only when filled)
     date_of_birth: str = ""
+    place_of_birth: str = ""
+    nationality: str = ""
     address: str = ""
     photo: str = ""
+    # [{"language": "German", "level": "A1 (beginner)"}] — rendered under "Sprachkenntnisse"
+    languages: List[Dict[str, str]] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> CandidateProfile:
@@ -156,8 +160,11 @@ class CandidateProfile:
             current_ctc_lpa=data.get("current_ctc_lpa"),
             expected_ctc_lpa=data.get("expected_ctc_lpa"),
             date_of_birth=data.get("date_of_birth", ""),
+            place_of_birth=data.get("place_of_birth", ""),
+            nationality=data.get("nationality", ""),
             address=data.get("address", ""),
             photo=data.get("photo", ""),
+            languages=data.get("languages", []),
         )
 
     def to_fact_registry(self) -> Dict[str, Any]:

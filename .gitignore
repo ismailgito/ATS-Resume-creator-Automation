@@ -89,3 +89,6 @@ outputs/*
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# LLM usage state (daily limit tracking), machine specific
+data/llm-state.json

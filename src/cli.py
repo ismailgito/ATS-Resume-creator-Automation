@@ -8,10 +8,49 @@ import os
 import sys
 from pathlib import Path
 from src.config import AppSettings, PROJECT_ROOT
+from src.llm.guard import get_guard
 from src.ingest.job_sources import IngestionManager
 from src.pipeline import ResumeAutomationPipeline
 from src.tracker.analytics import format_report_markdown, generate_tracking_report
 from src.tracker.db import ApplicationTrackerDB
+
+
+def _llm_state_line(settings) -> str:
+    """One-line summary of today's LLM / offline state."""
+    if not settings.has_llm_credentials():
+        return "OFFLINE (no LLM key configured)"
+    if not settings.llm_auto_fallback:
+        return "LLM (automatic offline fallback is switched off)"
+    state = get_guard(settings).status()
+    if state["limit_hit"]:
+        return f"OFFLINE until tomorrow (LLM limit reached at {state['tripped_at'][-8:]})"
+    if state["session_off_reason"]:
+        return "OFFLINE for this run (LLM keeps failing)"
+    return "LLM active"
+
+
+def cmd_llm_status(args):
+    """Show whether the LLM is active today, and how many resumes used which mode."""
+    settings = AppSettings()
+    state = get_guard(settings).status()
+    print("\n" + "=" * 65)
+    print("                    LLM USAGE STATUS (TODAY)                     ")
+    print("=" * 65)
+    print(f"Date            : {state['date']}")
+    print(f"LLM provider    : {settings.llm_provider} ({'key configured' if settings.has_llm_credentials() else 'no key, offline only'})")
+    print(f"Mode now        : {_llm_state_line(settings)}")
+    if state["limit_hit"]:
+        print(f"Limit reason    : {state['reason']}")
+    print(f"Resumes today   : {state['llm_resumes']} with LLM, {state['offline_resumes']} offline")
+    print(f"State file      : {settings.llm_state_path}")
+    print("=" * 65 + "\n")
+
+
+def cmd_llm_reset(args):
+    """Re-enable the LLM immediately (for example after adding credits)."""
+    settings = AppSettings()
+    get_guard(settings).reset()
+    print("LLM usage state cleared. The next resume will try the LLM again.")
 
 
 def cmd_check_env(args):
@@ -26,9 +65,8 @@ def cmd_check_env(args):
     print(f"Candidate Profile : {settings.candidate_profile_path} ({'Found' if settings.candidate_profile_path.exists() else 'Missing'})")
     print(f"Supabase Database : {settings.supabase_url or settings.database_url or 'Not configured (using memory)'}")
     print(f"Current LLM Mode  : {settings.llm_provider.upper()}")
-    from src.resume.sections import get_style
-    style = get_style()
-    print(f"Resume Style      : {style.upper()} ({'German Lebenslauf format' if style == 'de' else 'US/international format'})")
+    print("Resume Format     : German Lebenslauf (Berlin style), English text")
+    print(f"LLM Today         : {_llm_state_line(settings)}")
     print("-" * 65)
     print("CREDENTIALS STATUS:")
     for cred, is_set in status.items():
@@ -87,6 +125,7 @@ def cmd_run_sample(args):
                 print(f"  * PDF         : {Path(review_pkg.resume_pdf_path).name}")
                 print(f"  * Cover Note  : {Path(review_pkg.cover_note_path).name}")
                 print(f"  * Status      : {review_pkg.status.upper()}")
+                print(f"  * Written with: {pipeline.last_generation_mode}")
             else:
                 print(">> Score did not meet generation threshold. No package generated.")
 
@@ -113,6 +152,7 @@ def cmd_ingest(args):
         print(f"Reason         : {report.reason}")
         if pkg:
             print(f"Review Package Generated at: {pkg.output_directory}")
+            print(f"Written with: {pipeline.last_generation_mode}")
             print(f"PDF Resume: {pkg.resume_pdf_path}")
             print(f"DOCX Resume: {pkg.resume_docx_path}")
             print("\nNext step: Run 'python -m src.cli review' to inspect or approve this application.")
@@ -193,6 +233,10 @@ def main():
     # report
     subparsers.add_parser("report", help="View tracking and skill gap report")
 
+    # llm-status / llm-reset
+    subparsers.add_parser("llm-status", help="Show today's LLM vs offline mode and resume counts")
+    subparsers.add_parser("llm-reset", help="Re-enable the LLM now (after adding credits)")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -206,6 +250,8 @@ def main():
         "review": cmd_review,
         "decide": cmd_decide,
         "report": cmd_report,
+        "llm-status": cmd_llm_status,
+        "llm-reset": cmd_llm_reset,
     }
 
     commands[args.command](args)

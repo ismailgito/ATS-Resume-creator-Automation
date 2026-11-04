@@ -5,10 +5,12 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import requests
 from src.config import AppSettings
+from src.llm.guard import LLMUsageGuard, classify_error, get_guard
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class GeminiLLMClient(BaseLLMClient):
         self.base_url = base_url or f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
     def generate_json(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
-        url = f"{self.base_url}?key={self.api_key}"
+        headers = {"x-goog-api-key": self.api_key, "Content-Type": "application/json"}
         payload = {
             "contents": [
                 {
@@ -44,7 +46,7 @@ class GeminiLLMClient(BaseLLMClient):
                 "responseMimeType": "application/json",
             },
         }
-        resp = requests.post(url, json=payload, timeout=60)
+        resp = requests.post(self.base_url, headers=headers, json=payload, timeout=60)
         resp.raise_for_status()
         data = resp.json()
         raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
@@ -205,76 +207,9 @@ class OfflineDeterministicLLMClient(BaseLLMClient):
         }
 
     def _mock_tailor_resume(self, user_prompt: str) -> Dict[str, Any]:
-        try:
-            from src.config import load_candidate_profile
-            cand = load_candidate_profile()
-        except Exception:
-            cand = {}
-
-        full_name = cand.get("full_name", "Mohamed Ismail")
-        roles = cand.get("target_roles", ["Junior Performance Marketing Manager"])
-        summary_facts = cand.get("summary_facts", [])
-
-        summary = (
-            f"Results-driven {roles[0]} with hands-on expertise executing "
-            f"paid acquisition and lead generation across Meta Ads and Google Ads. "
-            f"Proven track record in GA4/GTM conversion tracking, CPL optimization, and n8n workflow automation."
-        )
-        if summary_facts:
-            summary = (
-                f"{summary_facts[0]} Skilled in Meta Ads lead generation, "
-                f"GA4/GTM event tracking, and n8n ad intelligence workflows to drive scalable acquisition."
-            )
-
-        skills = cand.get("skills", [
-            "Performance Marketing",
-            "Meta Ads",
-            "Google Ads (SEA)",
-            "Conversion Rate Optimization (CRO)",
-            "Google Analytics 4 (GA4)",
-            "Google Tag Manager (GTM)",
-            "Marketing Automation"
-        ])[:7]
-
-        experience = []
-        for emp in cand.get("employment", []):
-            experience.append({
-                "company": emp.get("company", ""),
-                "title": emp.get("title", ""),
-                "location": emp.get("location", ""),
-                "period": f"{emp.get('start_date', '')} - {emp.get('end_date', '')}",
-                "bullets": emp.get("responsibilities", [])[:4],
-            })
-
-        education = []
-        for ed in cand.get("education", []):
-            education.append({
-                "institution": ed.get("institution", ""),
-                "degree": ed.get("degree", ""),
-                "period": f"{ed.get('start_year', '')} - {ed.get('end_year', '')}",
-            })
-
-        certifications = [
-            {"name": c.get("name", ""), "issuer": c.get("issuer", ""), "date": c.get("date", "")}
-            for c in cand.get("certifications", [])[:4]
-        ]
-
-        return {
-            "summary": summary,
-            "skills": skills,
-            "experience": experience,
-            "education": education,
-            "certifications": certifications,
-            "gap_list": [],
-            "change_log": [
-                "Tailored summary targeting role requirements with verified campaign metrics.",
-                "Aligned skills section prioritizing Meta Ads, Google Ads, GA4, and GTM.",
-                "Ranked experience bullets highlighting verified lead acquisition and tracking impact.",
-            ],
-            "factuality_notes": [
-                "All statements and numbers match verified facts in candidate profile."
-            ]
-        }
+        # Offline mode has no model to write with. Returning nothing makes ResumeTailor use its
+        # own job-aware, fact-based builders instead of a canned job-independent text.
+        return {}
 
     def _mock_validate_resume(self, user_prompt: str) -> Dict[str, Any]:
         return {
@@ -289,42 +224,8 @@ class OfflineDeterministicLLMClient(BaseLLMClient):
         }
 
     def _mock_cover_note(self, user_prompt: str) -> Dict[str, Any]:
-        try:
-            from src.config import load_candidate_profile
-            cand = load_candidate_profile()
-            full_name = cand.get("full_name", "Mohamed Ismail")
-        except Exception:
-            full_name = "Mohamed Ismail"
-
-        # Style-aware subject line: German wrapper (Betreff) vs classic English.
-        try:
-            from src.resume.sections import get_style
-            is_de = get_style() == "de"
-        except Exception:
-            is_de = True
-
-        if is_de:
-            subject = "Bewerbung als Performance Marketing Manager"
-        else:
-            subject = f"Application for Performance Marketing Role - {full_name}"
-
-        return {
-            "subject": subject,
-            "body": (
-                "I am excited to apply for this performance marketing position. With practical experience "
-                "executing Meta Ads lead generation campaigns, analyzing placement and form performance, "
-                "and configuring end-to-end GA4 and GTM tracking, I focus on delivering scalable, "
-                "cost-efficient acquisition results. Furthermore, my experience building automated ad intelligence "
-                "workflows with n8n and Python allows me to execute quickly and optimize continuously. "
-                "With my approved German Opportunity Card (Chancenkarte), I am fully authorized and ready to contribute immediately in Germany."
-            ),
-            "claims_used": [
-                "Hands-on experience in Meta Ads lead generation and CPL optimization",
-                "GA4 and GTM event tracking setup and placement analysis",
-                "Marketing workflow automation with n8n",
-                "Work authorization via approved German Opportunity Card",
-            ]
-        }
+        # Same reason as _mock_tailor_resume: ResumeTailor builds the offline cover note itself.
+        return {}
 
 
 def _extract_json_from_text(text: str) -> Dict[str, Any]:
@@ -343,9 +244,68 @@ def _extract_json_from_text(text: str) -> Dict[str, Any]:
         raise
 
 
-def get_llm_client(settings: Optional[AppSettings] = None) -> BaseLLMClient:
-    """Factory to get the appropriate LLM client based on configured settings."""
-    cfg = settings or AppSettings()
+class FallbackLLMClient(BaseLLMClient):
+    """Live LLM with automatic fallback to the offline engine when the usage limit is hit.
+
+    * Limit or credit exhausted (HTTP 402/429 with quota wording): the guard is tripped, this
+      call is answered offline, and so is every later call that day, so the resume in progress
+      and all pending ones are still produced.
+    * Short rate limit (HTTP 429): retried a couple of times, honouring Retry-After.
+    * Any other failure is re-raised so the caller's own per-call fallback applies; after a few
+      in a row the LLM is skipped for the rest of the run.
+    """
+
+    RETRY_DELAYS = (2.0, 6.0)
+    MAX_RETRY_AFTER = 30.0
+
+    def __init__(
+        self,
+        live: BaseLLMClient,
+        offline: BaseLLMClient,
+        guard: LLMUsageGuard,
+        sleep: Callable[[float], None] = time.sleep,
+    ):
+        self.live = live
+        self.offline = offline
+        self.guard = guard
+        self._sleep = sleep
+
+    def _offline(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+        self.guard.note_offline_call()
+        return self.offline.generate_json(system_prompt, user_prompt)
+
+    def generate_json(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+        if not self.guard.llm_available():
+            return self._offline(system_prompt, user_prompt)
+
+        attempt = 0
+        while True:
+            try:
+                result = self.live.generate_json(system_prompt, user_prompt)
+            except Exception as exc:  # noqa: BLE001
+                kind, detail = classify_error(exc)
+                if kind == "limit_soft" and attempt < len(self.RETRY_DELAYS):
+                    self._sleep(self._retry_delay(exc, self.RETRY_DELAYS[attempt]))
+                    attempt += 1
+                    continue
+                if kind in ("limit_hard", "limit_soft"):
+                    self.guard.trip(detail)
+                    return self._offline(system_prompt, user_prompt)
+                self.guard.record_failure(detail)
+                raise
+            self.guard.record_success()
+            return result
+
+    def _retry_delay(self, exc: BaseException, default: float) -> float:
+        header = getattr(getattr(exc, "response", None), "headers", None) or {}
+        try:
+            return min(float(header.get("Retry-After", default)), self.MAX_RETRY_AFTER)
+        except (TypeError, ValueError):
+            return default
+
+
+def _build_live_client(cfg: AppSettings) -> Optional[BaseLLMClient]:
+    """Create the live provider client for the configured credentials, or None if there are none."""
     provider = cfg.llm_provider.lower()
 
     if provider == "gemini" and cfg.gemini_api_key and not cfg.gemini_api_key.startswith("your_"):
@@ -369,6 +329,18 @@ def get_llm_client(settings: Optional[AppSettings] = None) -> BaseLLMClient:
         logger.info("Auto-detected valid OpenAI API key. Using OpenAI LLM provider.")
         return OpenAILLMClient(api_key=cfg.openai_api_key, model=cfg.openai_model, base_url=cfg.llm_api_base_url)
 
-    # Fallback to smart offline heuristic provider
-    logger.info("No active external LLM credentials configured. Running in high-fidelity OFFLINE deterministic mode.")
-    return OfflineDeterministicLLMClient()
+    return None
+
+
+def get_llm_client(settings: Optional[AppSettings] = None) -> BaseLLMClient:
+    """Factory: live LLM wrapped with automatic offline fallback, or the offline engine alone."""
+    cfg = settings or AppSettings()
+    live = _build_live_client(cfg)
+
+    if live is None:
+        logger.info("No active external LLM credentials configured. Running in high-fidelity OFFLINE deterministic mode.")
+        return OfflineDeterministicLLMClient()
+
+    if not cfg.llm_auto_fallback:
+        return live
+    return FallbackLLMClient(live, OfflineDeterministicLLMClient(), get_guard(cfg))

@@ -1,134 +1,74 @@
-"""Single shared source of truth for resume section headings, order, and date formats.
+"""Single source of truth for the German (Berlin-style) Lebenslauf: labels and date formats.
 
-All three renderers (Markdown Jinja2 template, DOCX builder, PDF builder) must pull
-section labels from here so the styles can never drift apart again.
+The project only produces one format: a German tabular Lebenslauf with English body text.
+Headings and labels are German (that is the *format*), everything the candidate or the
+tailoring engine writes stays English (that is the *language*).
 
-Styles:
-  - "de": German Lebenslauf format (default) — German section headings, German date
-          conventions, optional "Persoenliche Daten" block. Body content stays in the
-          language produced by the tailoring engine (English by default).
-  - "us": Classic US/international format — the original English section headings.
+Markdown, DOCX and PDF all render from ``src/resume/layout.py``, which pulls its labels
+from here, so the three formats can never drift apart.
 """
 
 from __future__ import annotations
 
-import os
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 
 # --------------------------------------------------------------------------- #
-# Section labels per style
+# Section headings (order is defined in layout.py)
 # --------------------------------------------------------------------------- #
 
-_SECTIONS_DE: Dict[str, str] = {
+SECTIONS: Dict[str, str] = {
     "document_title": "Lebenslauf",
     "personal_data": "Persönliche Daten",
     "summary": "Kurzprofil",
-    "skills": "Kenntnisse & Fähigkeiten",
     "experience": "Berufserfahrung",
-    "achievements": "Erfolge & Wirkung",
-    "education": "Ausbildung & Zertifikate",
+    "education": "Ausbildung",
+    "projects": "Projekte",
+    "certifications": "Weiterbildung & Zertifikate",
+    "skills": "Kenntnisse",
+    "languages": "Sprachkenntnisse",
 }
 
-_SECTIONS_US: Dict[str, str] = {
-    "document_title": "",
-    "personal_data": "",
-    "summary": "Professional Summary",
-    "skills": "Core Competencies & Skills",
-    "experience": "Professional Experience",
-    "achievements": "Key Achievements & Impact",
-    "education": "Education & Certifications",
-}
-
-SECTION_STYLES: Dict[str, Dict[str, str]] = {
-    "de": _SECTIONS_DE,
-    "us": _SECTIONS_US,
-}
-
-# Sub-labels used inside sections (kept consistent across renderers)
-SUB_LABELS: Dict[str, Dict[str, str]] = {
-    "de": {
-        "platforms_tools": "Plattformen & Tools",
-        "education": "Ausbildung",
-        "certifications": "Zertifikate",
-        "evidence_prefix": "",
-        "present": "Present",
-        "page": "Seite",
-        "cover_note_title": "Anschreiben",
-        "cover_to": "An",
-        "cover_regarding": "Bewerbung als",
-        "cover_candidate": "Bewerber",
-        "cover_date": "Datum",
-        "cover_subject": "Betreff",
-        "cover_greeting": "Sehr geehrte Damen und Herren,",
-        "cover_closing": "Mit freundlichen Grüßen",
-    },
-    "us": {
-        "platforms_tools": "Platforms & Tools",
-        "education": "Education",
-        "certifications": "Certifications",
-        "evidence_prefix": "Evidence: ",
-        "present": "Present",
-        "page": "Page",
-        "cover_note_title": "Application Cover Note",
-        "cover_to": "To",
-        "cover_regarding": "Regarding",
-        "cover_candidate": "Candidate",
-        "cover_date": "Date",
-        "cover_subject": "Subject",
-        "cover_greeting": "Dear Hiring Team,",
-        "cover_closing": "Sincerely",
-    },
+# Row labels and wrapper text used inside sections and the cover note
+LABELS: Dict[str, str] = {
+    "address": "Anschrift",
+    "location": "Wohnort",
+    "phone": "Telefon",
+    "email": "E-Mail",
+    "date_of_birth": "Geburtsdatum",
+    "place_of_birth": "Geburtsort",
+    "nationality": "Staatsangehörigkeit",
+    "work_permit": "Arbeitserlaubnis",
+    "linkedin": "LinkedIn",
+    "portfolio": "Portfolio",
+    "github": "GitHub",
+    "skills_expertise": "Fachkenntnisse",
+    "skills_tools": "Tools & Plattformen",
+    "present": "Present",
+    "page": "Seite",
+    "cover_note_title": "Anschreiben",
+    "cover_to": "An",
+    "cover_regarding": "Bewerbung als",
+    "cover_candidate": "Bewerber",
+    "cover_date": "Datum",
+    "cover_subject": "Betreff",
+    "cover_greeting": "Sehr geehrte Damen und Herren,",
+    "cover_closing": "Mit freundlichen Grüßen",
 }
 
 
-def normalize_style(style: Optional[str]) -> str:
-    """Normalize a style string to a supported key ('de' or 'us'). Unknown -> 'de'."""
-    if not style:
-        return "de"
-    value = str(style).strip().lower().replace("_", "-")
-    if value in ("us", "en", "en-us", "en-gb", "uk", "us-intl"):
-        return "us"
-    return "de"
+def get_sections() -> Dict[str, str]:
+    """Return the section heading map."""
+    return SECTIONS
 
 
-def get_style() -> str:
-    """Resolve active style with precedence: RESUME_STYLE env var > policy.yaml > 'de'.
-
-    policy.yaml key: ats_formatting.resume_style (values: 'de' or 'us').
-    Falls back to 'de' (German default) on any error.
-    """
-    env_value = os.getenv("RESUME_STYLE")
-    if env_value is not None and env_value.strip():
-        return normalize_style(env_value)
-
-    try:
-        from src.config import AppSettings, load_yaml_config
-
-        settings = AppSettings()
-        if settings.resume_style:
-            return normalize_style(settings.resume_style)
-        policy = load_yaml_config(settings.policy_config_path)
-        raw = (policy.get("ats_formatting") or {}).get("resume_style")
-        if raw:
-            return normalize_style(raw)
-    except Exception:
-        pass
-    return "de"
-
-
-def get_sections(style: Optional[str] = None) -> Dict[str, str]:
-    """Return the section-label map for the requested (or active) style."""
-    return SECTION_STYLES[normalize_style(style) if style else get_style()]
-
-
-def get_sub_labels(style: Optional[str] = None) -> Dict[str, str]:
-    """Return the sub-label map for the requested (or active) style."""
-    return SUB_LABELS[normalize_style(style) if style else get_style()]
+def get_sub_labels() -> Dict[str, str]:
+    """Return the row label / wrapper text map."""
+    return LABELS
 
 
 # --------------------------------------------------------------------------- #
-# Date formatting
+# Date formatting (German conventions)
 # --------------------------------------------------------------------------- #
 
 _MONTHS_DE = (
@@ -142,54 +82,54 @@ _MONTH_ABBR_EN = (
 )
 
 
-def today_date(style: Optional[str] = None) -> str:
-    """Current date formatted per style: de -> '02. November 2026', us -> 'November 02, 2026'."""
+def today_date() -> str:
+    """Current date in German long form, e.g. '04. November 2026'."""
     now = datetime.now()
-    active = normalize_style(style) if style else get_style()
-    if active == "de":
-        return f"{now.day:02d}. {_MONTHS_DE[now.month - 1]} {now.year}"
-    return now.strftime("%B %d, %Y")
+    return f"{now.day:02d}. {_MONTHS_DE[now.month - 1]} {now.year}"
 
 
-def format_period(period: str, style: Optional[str] = None) -> str:
-    """Normalize a date period string for display.
+def format_month(part: str) -> str:
+    """Normalize one date to 'MM/YYYY' (or 'YYYY'). Unknown shapes and 'Present' pass through.
 
-    Handles common input shapes: '2022-06 - Present', '2022-06-15 - 2024-03-01',
-    'Jun 2022 - Present', '2022 - Present'.
-
-    - de: German CV convention 'MM/YYYY' ('06/2022 - Present').
-    - us: unchanged input (already English convention, e.g. 'Jun 2022 - Present').
+    Handles '2026-07', '2026-07-15', 'Jul 2026', 'July 2026', '07/2026' and bare '2026'.
     """
-    if not period:
-        return period
-    active = normalize_style(style) if style else get_style()
-    if active != "de":
-        return period
-
-    parts = [p.strip() for p in period.split(" - ")]
-    if len(parts) != 2:
-        return period
-
-    def _de_part(part: str) -> str:
-        part = part.strip()
-        # ISO 'YYYY-MM-DD'
-        if len(part) >= 10 and part[4] == "-" and part[7] == "-" and part[:4].isdigit():
-            year, month = part[:4], part[5:7]
-            if month.isdigit() and 1 <= int(month) <= 12:
-                return f"{month}/{year}"
-        # ISO 'YYYY-MM'
-        if len(part) == 7 and part[4] == "-" and part[:4].isdigit() and part[5:7].isdigit():
-            return f"{part[5:7]}/{part[:4]}"
-        # 'Mon YYYY' (English abbreviation)
-        for idx, name in enumerate(_MONTH_ABBR_EN, start=1):
-            if part.lower().startswith(name.lower()) and len(part) > 4:
-                year = part[len(name):].strip()
-                if year.isdigit():
-                    return f"{idx:02d}/{year}"
-        # bare 'YYYY'
-        if len(part) == 4 and part.isdigit():
-            return part
-        # 'Present' and anything else passes through untouched
+    part = (part or "").strip()
+    if not part:
         return part
 
-    return f"{_de_part(parts[0])} - {_de_part(parts[1])}"
+    # ISO 'YYYY-MM-DD'
+    if len(part) >= 10 and part[4] == "-" and part[7] == "-" and part[:4].isdigit():
+        year, month = part[:4], part[5:7]
+        if month.isdigit() and 1 <= int(month) <= 12:
+            return f"{month}/{year}"
+    # ISO 'YYYY-MM'
+    if len(part) == 7 and part[4] == "-" and part[:4].isdigit() and part[5:7].isdigit():
+        return f"{part[5:7]}/{part[:4]}"
+    # 'Mon YYYY' / 'Month YYYY' (English)
+    pieces = part.split()
+    if len(pieces) == 2 and pieces[1].isdigit() and len(pieces[1]) == 4:
+        for idx, abbr in enumerate(_MONTH_ABBR_EN, start=1):
+            if pieces[0].lower().startswith(abbr.lower()):
+                return f"{idx:02d}/{pieces[1]}"
+    return part
+
+
+def format_period(period: str) -> str:
+    """Normalize 'start - end' to German CV style, e.g. '07/2026 – 10/2026'."""
+    if not period:
+        return period
+    parts = [p.strip() for p in period.replace("–", "-").replace("—", "-").split(" - ")]
+    if len(parts) == 1:
+        return format_month(parts[0])
+    if len(parts) != 2:
+        return period
+    return f"{format_month(parts[0])} – {format_month(parts[1])}"
+
+
+def format_birth_date(value: str) -> str:
+    """Format an ISO birth date as German 'DD.MM.YYYY'. Anything else passes through."""
+    value = (value or "").strip()
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").strftime("%d.%m.%Y")
+    except ValueError:
+        return value

@@ -42,6 +42,11 @@ class AppSettings:
     anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
     llm_api_base_url: Optional[str] = os.getenv("LLM_API_BASE_URL")
 
+    # When a live LLM hits its usage limit, switch to offline (non-LLM) mode for the rest of
+    # the day and try the LLM again the next day. State is kept in a small JSON file.
+    llm_auto_fallback: bool = os.getenv("LLM_AUTO_FALLBACK", "true").strip().lower() not in ("0", "false", "no", "off")
+    llm_state_path: Path = PROJECT_ROOT / os.getenv("LLM_STATE_PATH", "data/llm-state.json")
+
     # Platform credentials (to be filled later by user)
     naukri_api_token: Optional[str] = os.getenv("NAUKRI_API_TOKEN")
     naukri_client_id: Optional[str] = os.getenv("NAUKRI_CLIENT_ID")
@@ -60,10 +65,6 @@ class AppSettings:
     output_dir: Path = PROJECT_ROOT / os.getenv("OUTPUT_DIR", "outputs")
 
     min_match_score: float = float(os.getenv("MIN_MATCH_SCORE", "75.0"))
-
-    # Resume style: "de" (German Lebenslauf, default) or "us" (classic international).
-    # Empty string means "read from config/policy.yaml -> ats_formatting.resume_style".
-    resume_style: str = os.getenv("RESUME_STYLE", "").strip().lower()
 
     # Notification & daily limit settings
     # (read via default_factory so each AppSettings() sees the *current*

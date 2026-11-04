@@ -50,8 +50,13 @@
   "current_ctc_lpa": null,
   "expected_ctc_lpa": null,
   "date_of_birth": "",
+  "place_of_birth": "",
+  "nationality": "",
   "address": "",
   "photo": "",
+  "languages": [
+    { "language": "German", "level": "A1 (beginner, currently learning)" }
+  ],
   "summary_facts": [
     "Junior performance marketer with two internships in lead generation and paid social across B2B software and tech services.",
     "Helped run a Meta Ads lead-gen campaign at IntoAEC (Instant Forms, warm vs cold ad sets) delivering 11 leads with warm CPL ₹842 vs ₹1,895 cold.",

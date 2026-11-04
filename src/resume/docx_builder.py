@@ -1,198 +1,147 @@
-"""ATS-Safe DOCX Resume Document Builder."""
+"""German tabular Lebenslauf as DOCX.
+
+The two-column look (dates left, content right) is built with a hanging indent and a tab
+stop instead of a Word table, so ATS parsers read it as plain paragraphs in the right order.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Cm, Pt, RGBColor
 from src.models.profile import CandidateProfile
 from src.models.resume import TailoredResume
-from src.resume.sections import format_period, get_sections, get_style, get_sub_labels
+from src.resume.layout import Entry, build_layout
+
+FONT = "Calibri"
+LEFT_COL = Cm(4.0)
+BULLET_INDENT = Cm(0.4)
+ACCENT = RGBColor(16, 44, 87)
+MUTED = RGBColor(90, 90, 90)
 
 
 def build_docx_resume(candidate: CandidateProfile, tailored: TailoredResume, output_path: Path) -> Path:
-    """Generate ATS-optimized Word document (.docx)."""
-    style = get_style()
-    sections = get_sections(style)
-    sublabels = get_sub_labels(style)
-
+    """Generate the German tabular Lebenslauf as a Word document (.docx)."""
+    layout = build_layout(candidate, tailored)
     doc = Document()
 
-    # Set 0.75 - 1.0 inch standard margins
-    sections_obj = doc.sections
-    for section in sections_obj:
-        section.top_margin = Inches(0.75)
-        section.bottom_margin = Inches(0.75)
-        section.left_margin = Inches(0.75)
-        section.right_margin = Inches(0.75)
+    for section in doc.sections:
+        section.page_width = Cm(21.0)
+        section.page_height = Cm(29.7)
+        section.top_margin = Cm(1.8)
+        section.bottom_margin = Cm(1.6)
+        section.left_margin = Cm(2.0)
+        section.right_margin = Cm(2.0)
 
-    # German Lebenslauf: document title above the name
-    if style == "de" and sections["document_title"]:
-        doc_title_p = doc.add_paragraph()
-        doc_title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        doc_title_run = doc_title_p.add_run(sections["document_title"])
-        doc_title_run.font.name = "Calibri"
-        doc_title_run.font.size = Pt(14)
-        doc_title_run.font.bold = True
-        doc_title_run.font.color.rgb = RGBColor(16, 44, 87)
+    normal = doc.styles["Normal"]
+    normal.font.name = FONT
+    normal.font.size = Pt(10)
+    normal.paragraph_format.space_after = Pt(0)
 
-    # Candidate Name (Header)
-    title_p = doc.add_paragraph()
-    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_run = title_p.add_run(candidate.full_name)
-    title_run.font.name = "Calibri"
-    title_run.font.size = Pt(20)
-    title_run.font.bold = True
-    title_run.font.color.rgb = RGBColor(26, 36, 43)
+    def add_run(paragraph, text, bold=False, italic=False, size=10.0, color=None):
+        run = paragraph.add_run(text)
+        run.font.name = FONT
+        run.font.size = Pt(size)
+        run.bold = bold
+        run.italic = italic
+        if color is not None:
+            run.font.color.rgb = color
+        return run
 
-    # Subtitle / Headline
-    sub_p = doc.add_paragraph()
-    sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_run = sub_p.add_run(candidate.headline)
-    sub_run.font.name = "Calibri"
-    sub_run.font.size = Pt(11)
-    sub_run.font.italic = True
-    sub_run.font.color.rgb = RGBColor(70, 80, 95)
+    def add_bottom_border(paragraph):
+        borders = OxmlElement("w:pBdr")
+        bottom = OxmlElement("w:bottom")
+        for key, value in (("val", "single"), ("sz", "6"), ("space", "1"), ("color", "B4BECD")):
+            bottom.set(qn(f"w:{key}"), value)
+        borders.append(bottom)
+        paragraph._p.get_or_add_pPr().append(borders)
 
-    def add_section_header(title: str):
+    def add_heading(title: str):
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(10)
-        p.paragraph_format.space_after = Pt(3)
-        run = p.add_run(title.upper())
-        run.font.name = "Calibri"
-        run.font.size = Pt(12)
-        run.font.bold = True
-        run.font.color.rgb = RGBColor(16, 44, 87)
+        p.paragraph_format.space_after = Pt(4)
+        p.paragraph_format.keep_with_next = True
+        add_run(p, title.upper(), bold=True, size=11, color=ACCENT)
+        add_bottom_border(p)
 
-    def add_label_line(label: str, value: str):
-        p = doc.add_paragraph()
-        p.paragraph_format.space_after = Pt(1)
-        label_run = p.add_run(f"{label}: ")
-        label_run.bold = True
-        label_run.font.name = "Calibri"
-        label_run.font.size = Pt(9.5)
-        value_run = p.add_run(value)
-        value_run.font.name = "Calibri"
-        value_run.font.size = Pt(9.5)
+    def hanging(paragraph, indent, hang=None, tab=None):
+        fmt = paragraph.paragraph_format
+        fmt.left_indent = indent
+        if hang is not None:
+            fmt.first_line_indent = -hang
+            fmt.tab_stops.add_tab_stop(tab if tab is not None else indent)
 
-    # ── Personal data block (German style only, only when fields are filled) ──
-    if style == "de":
-        personal_rows = []
-        if candidate.address:
-            personal_rows.append(("Address", candidate.address))
-        if candidate.date_of_birth:
-            personal_rows.append(("Date of Birth", candidate.date_of_birth))
-        if candidate.photo:
-            personal_rows.append(("Photo", candidate.photo))
-        personal_rows.append(("Location", candidate.contact.location))
-        personal_rows.append(("Email", candidate.contact.email))
-        personal_rows.append(("Phone", candidate.contact.phone))
-        if candidate.contact.linkedin:
-            personal_rows.append(("LinkedIn", candidate.contact.linkedin))
-        if candidate.contact.portfolio:
-            personal_rows.append(("Portfolio", candidate.contact.portfolio))
-        if candidate.contact.github:
-            personal_rows.append(("GitHub", candidate.contact.github))
+    def add_entry(entry: Entry):
+        # Full-width paragraph (Kurzprofil)
+        if not entry.left:
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(2)
+            add_run(p, entry.text)
+            return
 
-        add_section_header(sections["personal_data"])
-        for label, value in personal_rows:
-            if value:
-                add_label_line(label, value)
-    else:
-        # Contact Details (US style)
-        contact_p = doc.add_paragraph()
-        contact_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        contact_text = (
-            f"{candidate.contact.email}  |  {candidate.contact.phone}  |  {candidate.contact.location}\n"
-            f"LinkedIn: {candidate.contact.linkedin}  |  Portfolio: {candidate.contact.portfolio}"
-        )
-        contact_run = contact_p.add_run(contact_text)
-        contact_run.font.name = "Calibri"
-        contact_run.font.size = Pt(9.5)
-        contact_run.font.color.rgb = RGBColor(80, 80, 80)
+        is_label_row = not entry.heading
+        first = doc.add_paragraph()
+        first.paragraph_format.space_before = Pt(0 if is_label_row else 5)
+        first.paragraph_format.space_after = Pt(1)
+        first.paragraph_format.keep_with_next = bool(entry.detail or entry.bullets or (entry.heading and entry.text))
+        hanging(first, LEFT_COL, hang=LEFT_COL)
+        add_run(first, entry.left, bold=is_label_row)
+        add_run(first, "\t")
+        if entry.heading:
+            add_run(first, entry.heading, bold=True)
+        else:
+            add_run(first, entry.text)
 
-    # 1. Summary
-    add_section_header(sections["summary"])
-    sum_p = doc.add_paragraph()
-    sum_p.paragraph_format.space_after = Pt(6)
-    sum_run = sum_p.add_run(tailored.summary)
-    sum_run.font.name = "Calibri"
-    sum_run.font.size = Pt(10)
+        def indented(text: str, italic=False, color=None):
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(1)
+            p.paragraph_format.left_indent = LEFT_COL
+            add_run(p, text, italic=italic, color=color)
 
-    # 2. Skills
-    add_section_header(sections["skills"])
-    skills_p = doc.add_paragraph()
-    skills_p.paragraph_format.space_after = Pt(4)
-    skills_run = skills_p.add_run(" • ".join(tailored.skills))
-    skills_run.font.name = "Calibri"
-    skills_run.font.size = Pt(9.5)
+        if entry.detail:
+            indented(entry.detail, italic=True, color=MUTED)
+        if entry.heading and entry.text:
+            indented(entry.text)
+        for bullet in entry.bullets:
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(1.5)
+            hanging(p, LEFT_COL + BULLET_INDENT, hang=BULLET_INDENT)
+            add_run(p, "•\t" + bullet)
 
-    tools_p = doc.add_paragraph()
-    tools_p.paragraph_format.space_after = Pt(6)
-    tools_label = tools_p.add_run(f"{sublabels['platforms_tools']}: ")
-    tools_label.bold = True
-    tools_label.font.name = "Calibri"
-    tools_label.font.size = Pt(9.5)
-    tools_val = tools_p.add_run(", ".join(candidate.tools))
-    tools_val.font.name = "Calibri"
-    tools_val.font.size = Pt(9.5)
+    # ── Header ──
+    if layout.title:
+        title_p = doc.add_paragraph()
+        add_run(title_p, layout.title.upper(), bold=True, size=10, color=MUTED)
 
-    # 3. Experience
-    add_section_header(sections["experience"])
-    for role in tailored.experience:
-        role_p = doc.add_paragraph()
-        role_p.paragraph_format.space_before = Pt(4)
-        role_p.paragraph_format.space_after = Pt(1)
+    if layout.photo:
+        photo_p = doc.add_paragraph()
+        photo_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        photo_p.add_run().add_picture(str(layout.photo), width=Cm(3.2))
 
-        title_r = role_p.add_run(f"{role.title} — {role.company}")
-        title_r.font.name = "Calibri"
-        title_r.font.size = Pt(10.5)
-        title_r.font.bold = True
+    name_p = doc.add_paragraph()
+    name_p.paragraph_format.space_after = Pt(1)
+    add_run(name_p, layout.name, bold=True, size=20, color=RGBColor(26, 36, 43))
+    if layout.headline:
+        head_p = doc.add_paragraph()
+        add_run(head_p, layout.headline, italic=True, size=10.5, color=MUTED)
 
-        meta_p = doc.add_paragraph()
-        meta_p.paragraph_format.space_after = Pt(2)
-        meta_r = meta_p.add_run(f"{role.location}  |  {format_period(role.period, style)}")
-        meta_r.font.name = "Calibri"
-        meta_r.font.size = Pt(9)
-        meta_r.font.italic = True
-        meta_r.font.color.rgb = RGBColor(90, 90, 90)
+    # ── Sections ──
+    for section in layout.sections:
+        add_heading(section.title)
+        for entry in section.entries:
+            add_entry(entry)
 
-        for bullet in role.bullets:
-            b_p = doc.add_paragraph(style="List Bullet")
-            b_p.paragraph_format.space_after = Pt(2)
-            b_run = b_p.add_run(bullet)
-            b_run.font.name = "Calibri"
-            b_run.font.size = Pt(9.5)
-
-    # 4. Achievements
-    add_section_header(sections["achievements"])
-    for ach in candidate.achievements:
-        ach_p = doc.add_paragraph(style="List Bullet")
-        ach_p.paragraph_format.space_after = Pt(2)
-        m_run = ach_p.add_run(f"{ach.metric}: ")
-        m_run.bold = True
-        m_run.font.name = "Calibri"
-        m_run.font.size = Pt(9.5)
-        s_run = ach_p.add_run(f"{ach.statement} ({ach.time_period})")
-        s_run.font.name = "Calibri"
-        s_run.font.size = Pt(9.5)
-
-    # 5. Education & Certifications
-    add_section_header(sections["education"])
-    for edu in candidate.education:
-        edu_p = doc.add_paragraph(style="List Bullet")
-        edu_p.paragraph_format.space_after = Pt(1)
-        edu_run = edu_p.add_run(f"{edu.degree}, {edu.institution} ({edu.start_year} - {edu.end_year})")
-        edu_run.font.name = "Calibri"
-        edu_run.font.size = Pt(9.5)
-
-    for cert in candidate.certifications:
-        cert_p = doc.add_paragraph(style="List Bullet")
-        cert_p.paragraph_format.space_after = Pt(1)
-        c_run = cert_p.add_run(f"{cert.name} — {cert.issuer} ({cert.date})")
-        c_run.font.name = "Calibri"
-        c_run.font.size = Pt(9.5)
+    # ── Ort, Datum, Name ──
+    place_p = doc.add_paragraph()
+    place_p.paragraph_format.space_before = Pt(18)
+    place_p.paragraph_format.keep_with_next = True
+    add_run(place_p, f"{layout.place}, {layout.date}")
+    sign_p = doc.add_paragraph()
+    sign_p.paragraph_format.space_before = Pt(14)
+    add_run(sign_p, layout.name, bold=True)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(output_path))

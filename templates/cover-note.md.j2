@@ -1,9 +1,8 @@
-{% if style == "de" %}
 # {{ sublabels.cover_note_title }}
 
-**{{ sublabels.cover_to }}:** Bewerbungsteam / Personalabteilung, {{ job.company }}  
-**{{ sublabels.cover_regarding }}:** {{ job.title }}  
-**{{ sublabels.cover_candidate }}:** {{ candidate.full_name }} ({{ candidate.contact.email }} | {{ candidate.contact.phone }})  
+**{{ sublabels.cover_to }}:** Bewerbungsteam / Personalabteilung, {{ job.company }}
+**{{ sublabels.cover_regarding }}:** {{ job.title }}
+**{{ sublabels.cover_candidate }}:** {{ candidate.full_name }} ({{ candidate.contact.email }} | {{ candidate.contact.phone }})
 **{{ sublabels.cover_date }}:** {{ today_date }}
 
 ---
@@ -14,28 +13,7 @@
 
 {{ cover_note.body }}
 
-{{ sublabels.cover_closing }},  
-**{{ candidate.full_name }}**  
-{{ candidate.contact.email }} | {{ candidate.contact.phone }}  
+{{ sublabels.cover_closing }},
+**{{ candidate.full_name }}**
+{{ candidate.contact.email }} | {{ candidate.contact.phone }}
 {{ candidate.contact.linkedin }}
-{% else %}
-# {{ sublabels.cover_note_title }}
-
-**{{ sublabels.cover_to }}:** Hiring Team / Talent Acquisition at {{ job.company }}  
-**{{ sublabels.cover_regarding }}:** Application for {{ job.title }}  
-**{{ sublabels.cover_candidate }}:** {{ candidate.full_name }} ({{ candidate.contact.email }} | {{ candidate.contact.phone }})  
-**{{ sublabels.cover_date }}:** {{ today_date }}
-
----
-
-### {{ sublabels.cover_subject }}: {{ cover_note.subject }}
-
-{{ sublabels.cover_greeting }} at {{ job.company }},
-
-{{ cover_note.body }}
-
-{{ sublabels.cover_closing }},  
-**{{ candidate.full_name }}**  
-{{ candidate.contact.email }} | {{ candidate.contact.phone }}  
-{{ candidate.contact.linkedin }}
-{% endif %}
