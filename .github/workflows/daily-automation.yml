@@ -4,6 +4,7 @@ on:
   schedule:
     # Runs daily at 08:00 UTC = 1:30 PM IST
     - cron: "0 8 * * *"
+  on:
   workflow_dispatch:
     inputs:
       csv_url:
@@ -92,7 +93,6 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           LLM_PROVIDER: gemini
-          RESUME_STYLE: de
           MIN_MATCH_SCORE: ${{ github.event.inputs.min_score || '75' }}
           DAILY_LIMIT: ${{ github.event.inputs.daily_limit || '10' }}
         run: |
