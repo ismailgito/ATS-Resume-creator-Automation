@@ -86,6 +86,20 @@ class JobParser:
                 if item not in ["Performance Marketing", "Paid Search", "Paid Social", "Funnel Analysis", "A/B Testing", "CRO", "ROAS Optimization"]:
                     detected_tools.add(item)
 
+        # Domain-aware skill detection (e.g. out-of-domain engineering/technical skills)
+        domain_cfg = self.scoring_config.get("domain", {})
+        ood_skills = domain_cfg.get("out_of_domain_skills", [])
+        for ood_term in ood_skills:
+            pattern = r"\b" + re.escape(ood_term) + r"\b"
+            if re.search(pattern, text, re.IGNORECASE):
+                detected_skills.add(ood_term.title())
+                if ood_term in [
+                    "python", "docker", "kubernetes", "fastapi", "django", "flask",
+                    "react", "langchain", "pinecone", "chroma", "faiss", "git",
+                    "aws", "gcp", "azure", "terraform", "pytorch", "tensorflow"
+                ]:
+                    detected_tools.add(ood_term.title())
+
         return {
             "title": job.title,
             "company": job.company,

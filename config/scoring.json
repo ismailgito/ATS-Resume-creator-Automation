@@ -78,5 +78,42 @@
       "funnel analysis",
       "tracking"
     ]
+  },
+  "domain": {
+    "candidate_domain": "Performance / Digital Marketing",
+    "candidate_title_tokens": [
+      "marketing", "performance", "digital", "growth", "paid", "ppc", "sea",
+      "sem", "media", "acquisition", "cro", "analytics", "content", "seo",
+      "social", "brand", "ecommerce", "martech"
+    ],
+    "out_of_domain_tokens": [
+      "engineer", "developer", "programmer", "architect", "devops", "sre",
+      "backend", "frontend", "fullstack", "infrastructure", "data", "scientist",
+      "ml", "machine", "learning", "nlp", "ai", "java", "golang", "kubernetes",
+      "cloud", "security", "mechanical", "electrical", "civil", "firmware", "embedded"
+    ],
+    "out_of_domain_skills": [
+      "python", "javascript", "typescript", "java", "golang", "c++", "rust",
+      "sql", "nosql", "rest api", "rest apis", "fastapi", "django", "flask",
+      "react", "node.js", "nodejs", "llm", "rag", "vector database",
+      "vector databases", "pinecone", "chroma", "faiss", "langchain", "openai",
+      "gemini api", "claude", "prompt engineering", "prompt", "embedding",
+      "docker", "kubernetes", "aws", "gcp", "azure", "terraform",
+      "machine learning", "deep learning", "pytorch", "tensorflow", "git", "version control"
+    ],
+    "achievement_keywords": [
+      "roas", "cpl", "cac", "google", "meta", "ga4", "gtm", "scale", "cro",
+      "ads", "seo", "acquisition", "campaign", "clarity", "conversion",
+      "funnel", "paid", "landing page", "a/b"
+    ],
+    "out_of_domain_achievement_keywords": [
+      "python", "llm", "rag", "vector", "api", "fastapi", "langchain",
+      "openai", "gemini", "claude", "pinecone", "faiss", "chroma", "docker",
+      "deploy", "pipeline", "model", "prompt", "embedding", "git", "chatbot"
+    ],
+    "industry_keywords": [
+      "ecommerce", "e-commerce", "d2c", "b2b", "saas", "fintech", "edtech",
+      "agency", "tech", "growth", "software"
+    ]
   }
 }

@@ -1,4 +1,18 @@
 # ATS Resume Automation - Deterministic Match Scoring Configuration
+# ─────────────────────────────────────────────────────────────────
+# HOW TO USE THIS FOR A DIFFERENT PROFESSION
+# ─────────────────────────────────────────────────────────────────
+# 1. Set `domain.candidate_domain` to your profession label (free text, used in mismatch messages).
+# 2. Update `domain.candidate_title_tokens` — single-word title tokens that identify YOUR domain.
+#    These protect your roles from being classified as "out-of-domain".
+# 3. Update `domain.out_of_domain_tokens` — single-word title tokens that mark ALIEN domains.
+#    Roles whose titles contain only these (and none of your candidate_title_tokens) get hard-rejected.
+# 4. Update `domain.out_of_domain_skills` — specific technical skills that belong to alien domains.
+#    Missing many of these triggers the domain-mismatch penalty.
+# 5. Update `domain.achievement_keywords` — words used to score how relevant your achievements
+#    are to a given JD. Use terms from YOUR discipline, not generic ones.
+# 6. Update `domain.industry_keywords` — industry/sector words that indicate a good context for you.
+# ─────────────────────────────────────────────────────────────────
 weights:
   title_role_fit: 0.20
   required_skills: 0.25
@@ -69,3 +83,178 @@ synonyms:
     - "marketing analytics"
     - "funnel analysis"
     - "tracking"
+
+# ─────────────────────────────────────────────────────────────────
+# DOMAIN CONFIGURATION
+# Controls profession-aware scoring. Change this block to switch professions.
+# ─────────────────────────────────────────────────────────────────
+domain:
+  # Free-text label shown in mismatch warning messages.
+  candidate_domain: "Performance / Digital Marketing"
+
+  # Single-word title tokens that identify THIS candidate's domain.
+  # A job title containing any of these is treated as "in-domain" (or at least "mixed").
+  # → Change these to your profession's title keywords.
+  candidate_title_tokens:
+    - "marketing"
+    - "performance"
+    - "digital"
+    - "growth"
+    - "paid"
+    - "ppc"
+    - "sea"
+    - "sem"
+    - "media"
+    - "acquisition"
+    - "cro"
+    - "analytics"
+    - "content"
+    - "seo"
+    - "social"
+    - "brand"
+    - "ecommerce"
+    - "martech"
+
+  # Single-word title tokens that mark ALIEN / out-of-domain roles.
+  # Jobs whose titles contain ONLY these tokens (none of candidate_title_tokens) → hard-rejected.
+  # → Replace or extend for your profession. E.g. for a designer, add "accountant", "lawyer" etc.
+  out_of_domain_tokens:
+    - "engineer"
+    - "developer"
+    - "programmer"
+    - "architect"
+    - "devops"
+    - "sre"
+    - "backend"
+    - "frontend"
+    - "fullstack"
+    - "infrastructure"
+    - "data"
+    - "scientist"
+    - "ml"
+    - "machine"
+    - "learning"
+    - "nlp"
+    - "ai"
+    - "java"
+    - "golang"
+    - "kubernetes"
+    - "cloud"
+    - "security"
+    - "mechanical"
+    - "electrical"
+    - "civil"
+    - "firmware"
+    - "embedded"
+
+  # Skills that belong strictly to out-of-domain professions.
+  # If a JD requires many of these and the candidate lacks them → domain-mismatch flag.
+  # → Replace with skills that DON'T belong to your profession.
+  out_of_domain_skills:
+    - "python"
+    - "javascript"
+    - "typescript"
+    - "java"
+    - "golang"
+    - "c++"
+    - "rust"
+    - "sql"
+    - "nosql"
+    - "rest api"
+    - "rest apis"
+    - "fastapi"
+    - "django"
+    - "flask"
+    - "react"
+    - "node.js"
+    - "nodejs"
+    - "llm"
+    - "rag"
+    - "vector database"
+    - "vector databases"
+    - "pinecone"
+    - "chroma"
+    - "faiss"
+    - "langchain"
+    - "openai"
+    - "gemini api"
+    - "claude"
+    - "prompt engineering"
+    - "prompt"
+    - "embedding"
+    - "docker"
+    - "kubernetes"
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "terraform"
+    - "machine learning"
+    - "deep learning"
+    - "pytorch"
+    - "tensorflow"
+    - "git"
+    - "version control"
+
+  # Keywords used in achievement relevance scoring for IN-DOMAIN jobs.
+  # Achievements containing any of these (that also appear in the JD) score higher.
+  # → Replace with outcome/metric terms from YOUR profession.
+  achievement_keywords:
+    - "roas"
+    - "cpl"
+    - "cac"
+    - "google"
+    - "meta"
+    - "ga4"
+    - "gtm"
+    - "scale"
+    - "cro"
+    - "ads"
+    - "seo"
+    - "acquisition"
+    - "campaign"
+    - "clarity"
+    - "conversion"
+    - "funnel"
+    - "paid"
+    - "landing page"
+    - "a/b"
+
+  # Keywords used in achievement relevance scoring for OUT-OF-DOMAIN jobs.
+  # Only achievements matching these (engineering-specific) terms count toward an engineering JD.
+  out_of_domain_achievement_keywords:
+    - "python"
+    - "llm"
+    - "rag"
+    - "vector"
+    - "api"
+    - "fastapi"
+    - "langchain"
+    - "openai"
+    - "gemini"
+    - "claude"
+    - "pinecone"
+    - "faiss"
+    - "chroma"
+    - "docker"
+    - "deploy"
+    - "pipeline"
+    - "model"
+    - "prompt"
+    - "embedding"
+    - "git"
+    - "chatbot"
+
+  # Industry/sector keywords. Jobs mentioning any of these in title/description → high industry score.
+  # → Add or replace with sectors relevant to YOUR profession.
+  industry_keywords:
+    - "ecommerce"
+    - "e-commerce"
+    - "d2c"
+    - "b2b"
+    - "saas"
+    - "fintech"
+    - "edtech"
+    - "agency"
+    - "tech"
+    - "growth"
+    - "software"

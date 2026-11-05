@@ -161,7 +161,8 @@ class OfflineDeterministicLLMClient(BaseLLMClient):
             "Google Ads", "Meta Ads", "Facebook Ads", "LinkedIn Ads", "GA4", "GTM",
             "Google Analytics", "Looker Studio", "CRO", "A/B Testing", "Shopify",
             "Unbounce", "Hotjar", "Klaviyo", "AppsFlyer", "PMax", "SEM", "PPC",
-            "Salesforce Marketing Cloud", "Marketo", "DV360", "The Trade Desk", "Java", "Spring Boot"
+            "Salesforce Marketing Cloud", "Marketo", "DV360", "The Trade Desk", "Java", "Spring Boot",
+            "Python", "FastAPI", "Docker", "Kubernetes", "AWS", "GCP", "RAG", "LLM", "LangChain", "Git"
         ]
         found_skills = [term for term in known_terms if re.search(r"\b" + re.escape(term) + r"\b", text, re.I)]
 
@@ -173,8 +174,8 @@ class OfflineDeterministicLLMClient(BaseLLMClient):
             "experience_min": exp_min,
             "experience_max": exp_max,
             "salary": None,
-            "must_have_skills": found_skills[:4] if found_skills else ["Performance Marketing"],
-            "nice_to_have_skills": found_skills[4:8] if len(found_skills) > 4 else [],
+            "must_have_skills": found_skills[:6] if found_skills else [],
+            "nice_to_have_skills": found_skills[6:12] if len(found_skills) > 6 else [],
             "platforms_and_tools": found_skills,
             "responsibilities": [
                 "Execute and optimize paid acquisition campaigns across Meta and Google.",

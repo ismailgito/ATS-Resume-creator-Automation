@@ -60,3 +60,18 @@ def test_scorer_triggers_negative_constraints(candidate, scorer, parser):
 def test_scoring_weights_sum_to_one(scorer):
     total_weights = sum(scorer.weights.values())
     assert abs(total_weights - 1.0) < 0.001
+
+
+def test_scorer_ai_engineer_role_rejected(candidate, scorer, parser):
+    jd_text = (
+        "We are hiring an AI Engineer with 1-3 years of experience to build and deploy LLM-powered applications. "
+        "Required Skills: Python, REST APIs, Prompt engineering, RAG pipelines, Vector databases, LLM APIs. "
+        "Preferred Skills: n8n, LangChain, Docker, FastAPI."
+    )
+    job = IngestionManager.from_text(jd_text, title="AI Engineer", company="Tech Solution")
+    parsed = parser.parse(job)
+    report = scorer.score(parsed, candidate)
+
+    assert report.overall_score < 40.0
+    assert report.recommendation == "reject"
+    assert any("Domain mismatch" in flag for flag in report.negative_constraint_flags)

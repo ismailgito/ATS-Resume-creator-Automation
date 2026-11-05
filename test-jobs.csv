@@ -1,0 +1,100 @@
+"title","company","location","url","description"
+"Junior Performance Marketing Executive","BrightLeaf Digital","Chennai, India","https://example.com/jobs/jr-perf-mktg-001","BrightLeaf Digital is hiring a Junior Performance Marketing Executive to manage paid campaigns for D2C and SaaS clients.
+
+Responsibilities:
+- Plan, launch and optimise Google Ads (Search, Shopping, Performance Max) and Meta Ads campaigns
+- Monitor daily spend, ROAS, CPA and CTR; recommend budget reallocations
+- Set up conversion tracking using GA4, Google Tag Manager and UTM conventions
+- Run A/B tests on creatives, audiences and landing pages
+- Prepare weekly performance reports for clients
+
+Requirements:
+- 0-2 years of experience in paid media or digital marketing
+- Hands-on knowledge of Google Ads, Meta Ads Manager and GA4
+- Strong Excel / Google Sheets skills
+- Analytical mindset and clear communication
+- BBA / BBM / MBA in Marketing preferred
+
+Nice to have: Google Ads and Meta Blueprint certifications, CRO experience, Looker Studio."
+"Backend Engineer (Python)","Finlytics Technologies","Bengaluru, India","https://example.com/jobs/backend-eng-002","Finlytics Technologies is looking for a Backend Engineer to build scalable APIs for our fintech analytics platform.
+
+Responsibilities:
+- Design, build and maintain REST APIs and microservices in Python (FastAPI / Django)
+- Model and optimise PostgreSQL schemas and queries
+- Build background workers and queues using Celery and Redis
+- Write unit and integration tests; maintain CI/CD pipelines
+- Deploy and monitor services on AWS (EC2, RDS, S3, Lambda)
+
+Requirements:
+- 2-4 years of backend development experience
+- Strong Python, SQL and API design fundamentals
+- Experience with Docker and Git workflows
+- Understanding of authentication (OAuth2, JWT) and system design basics
+
+Nice to have: Kubernetes, Kafka, GraphQL, Terraform."
+"Junior Digital Marketing Specialist","Zalando SE","Berlin, Germany","https://example.com/jobs/jr-digital-mktg-003","Zalando is looking for a Junior Digital Marketing Specialist to support our performance and CRM teams in Berlin.
+
+Your role:
+- Support execution of paid search, paid social and display campaigns
+- Manage campaign tracking with GA4, GTM and UTM parameters
+- Analyse funnel data and report on KPIs (CPA, ROAS, conversion rate)
+- Collaborate with creative and content teams on ad copy and landing pages
+- Assist with email and push notification campaigns
+
+What we expect:
+- 1-2 years of experience in digital marketing, or a relevant internship
+- Degree in Business, Marketing or a related field
+- Solid knowledge of Google Ads, Meta Ads and GA4
+- Fluent English; German is a plus
+- Data-driven, structured and eager to learn
+
+Nice to have: SEO basics, marketing automation (n8n, Zapier), SQL."
+"AI Engineer","NeuralPath AI","Hyderabad, India (Hybrid)","https://example.com/jobs/ai-engineer-004","NeuralPath AI is hiring an AI Engineer to build LLM-powered products for enterprise customers.
+
+Responsibilities:
+- Design and ship LLM applications using OpenAI, Anthropic Claude and Gemini APIs
+- Build RAG pipelines with vector databases (Pinecone, pgvector, Chroma)
+- Develop agentic workflows and tool integrations using MCP, LangChain or LlamaIndex
+- Evaluate model outputs, optimise prompts and reduce latency and cost
+- Deploy inference services with FastAPI and Docker
+
+Requirements:
+- 2-5 years of software or ML engineering experience
+- Strong Python skills
+- Hands-on experience with RAG, embeddings and prompt engineering
+- Familiarity with workflow automation tools such as n8n
+- Good understanding of REST APIs and cloud deployment
+
+Nice to have: Fine-tuning, LLM evaluation frameworks, Hugging Face, MLOps."
+"Full Stack Developer","CartNest Commerce","Remote (India)","https://example.com/jobs/fullstack-dev-005","CartNest Commerce is looking for a Full Stack Developer to build features across our e-commerce platform.
+
+Responsibilities:
+- Develop responsive front-end interfaces with React, Next.js and Tailwind CSS
+- Build backend services and REST APIs with Node.js and Express
+- Work with MongoDB and PostgreSQL databases
+- Integrate payment gateways (Razorpay, Stripe) and third-party APIs
+- Participate in code reviews, sprint planning and QA
+
+Requirements:
+- 2-4 years of full stack development experience
+- Strong JavaScript / TypeScript, React and Node.js skills
+- Experience with Git, REST APIs and basic CI/CD
+- Knowledge of web performance and SEO fundamentals
+
+Nice to have: AWS, Docker, GA4 / GTM event tracking, Shopify."
+"Creative Media Specialist","Pixelcraft Studios","Mumbai, India","https://example.com/jobs/creative-media-006","Pixelcraft Studios is hiring a Creative Media Specialist to produce high-performing ad creatives and social content for global brands.
+
+Responsibilities:
+- Design static, carousel and short-form video ad creatives for Meta, YouTube and LinkedIn
+- Edit reels and short videos using Adobe Premiere Pro, After Effects and CapCut
+- Create brand assets in Photoshop, Illustrator and Canva
+- Work with performance marketers to test creative variations and iterate on CTR and hook rate
+- Use AI tools (Midjourney, Flux, Veo, Runway) to speed up concepting and production
+
+Requirements:
+- 1-3 years of experience in creative design or video editing
+- Strong portfolio showing social and ad creatives
+- Understanding of platform specs, storytelling and brand guidelines
+- Ability to meet tight deadlines
+
+Nice to have: Motion graphics, UGC-style content, basic knowledge of performance marketing metrics."
