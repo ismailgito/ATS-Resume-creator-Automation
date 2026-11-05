@@ -147,6 +147,28 @@ class OfflineDeterministicLLMClient(BaseLLMClient):
     def _mock_parse_job(self, user_prompt: str) -> Dict[str, Any]:
         text = user_prompt
 
+        # Extract actual job text if wrapped in prompt template
+        m_job = re.search(r"JOB TEXT:\s*(.*)", text, re.DOTALL | re.IGNORECASE)
+        job_content = m_job.group(1).strip() if m_job else text.strip()
+        if not job_content or len(job_content) < 30:
+            return {
+                "title": "",
+                "company": "",
+                "location": "",
+                "employment_type": "",
+                "experience_min": None,
+                "experience_max": None,
+                "salary": None,
+                "must_have_skills": [],
+                "nice_to_have_skills": [],
+                "platforms_and_tools": [],
+                "responsibilities": [],
+                "education_requirements": [],
+                "certifications": [],
+                "keywords": [],
+                "uncertainties": ["Empty or unparseable job description"],
+            }
+
         # Detect experience bounds
         exp_match = re.search(r"(\d+)\s*(?:-|to)\s*(\d+)\s*years?", text, re.IGNORECASE)
         exp_min = float(exp_match.group(1)) if exp_match else None
@@ -161,7 +183,7 @@ class OfflineDeterministicLLMClient(BaseLLMClient):
             "Google Ads", "Meta Ads", "Facebook Ads", "LinkedIn Ads", "GA4", "GTM",
             "Google Analytics", "Looker Studio", "CRO", "A/B Testing", "Shopify",
             "Unbounce", "Hotjar", "Klaviyo", "AppsFlyer", "PMax", "SEM", "PPC",
-            "Salesforce Marketing Cloud", "Marketo", "DV360", "The Trade Desk", "Java", "Spring Boot",
+            "Salesforce Marketing Cloud", "Marketo", "DV360", "The Trade Desk", "HubSpot", "Java", "Spring Boot",
             "Python", "FastAPI", "Docker", "Kubernetes", "AWS", "GCP", "RAG", "LLM", "LangChain", "Git"
         ]
         found_skills = [term for term in known_terms if re.search(r"\b" + re.escape(term) + r"\b", text, re.I)]

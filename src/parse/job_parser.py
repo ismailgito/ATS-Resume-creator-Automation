@@ -78,7 +78,7 @@ class JobParser:
         catalog = [
             "Shopify", "Unbounce", "Hotjar", "Klaviyo", "AppsFlyer", "SEMrush", "A/B Testing",
             "CRO", "Performance Marketing", "Paid Search", "Paid Social", "Funnel Analysis",
-            "ROAS Optimization", "CAC", "Salesforce Marketing Cloud", "Marketo", "DV360", "The Trade Desk", "Java", "Spring Boot"
+            "ROAS Optimization", "CAC", "Salesforce Marketing Cloud", "Marketo", "DV360", "The Trade Desk", "HubSpot", "Java", "Spring Boot"
         ]
         for item in catalog:
             if re.search(r"\b" + re.escape(item) + r"\b", text, re.IGNORECASE):
@@ -129,7 +129,11 @@ class JobParser:
         must_skills = list(dict.fromkeys((rule.get("must_have_skills", []) + llm.get("must_have_skills", []))))
         nice_skills = list(dict.fromkeys(llm.get("nice_to_have_skills", [])))
         tools = list(dict.fromkeys((rule.get("platforms_and_tools", []) + llm.get("platforms_and_tools", []))))
-        responsibilities = llm.get("responsibilities", []) or [f"Execute and scale campaigns for {title}."]
+        desc_clean = job.description_raw.strip() if job.description_raw else ""
+        if not desc_clean or len(desc_clean) < 30:
+            responsibilities = []
+        else:
+            responsibilities = llm.get("responsibilities", []) or [f"Execute and scale campaigns for {title}."]
         uncertainties = list(dict.fromkeys((rule.get("uncertainties", []) + llm.get("uncertainties", []))))
 
         return ParsedJob(
@@ -149,4 +153,5 @@ class JobParser:
             certifications=llm.get("certifications", []),
             keywords=list(dict.fromkeys(must_skills + tools)),
             uncertainties=uncertainties,
+            description_raw=job.description_raw,
         )

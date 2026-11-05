@@ -10,7 +10,7 @@ Python CLI + GitHub Actions automation that turns a job description into an **AT
 
 - Works **fully offline/deterministic** with zero API keys. LLM (Gemini / OpenAI / Anthropic) is an optional upgrade with automatic fallback.
 - **Human-in-the-loop:** the system NEVER submits applications. The user runs `decide` (apply / applied / save / reject).
-- **Default output style:** German *Lebenslauf* (`de`) with English body content; `us` style is switchable.
+- **Output format:** German *Lebenslauf* (`de`) with English body content (Berlin-style standard ATS format).
 
 ## 2. Hard rules for agents (do not violate)
 
@@ -147,14 +147,13 @@ Key fields: `candidate_id`, `full_name`, `headline`, `contact{email,phone,locati
 
 ## 10. Resume style
 
-- `RESUME_STYLE=de|us` env wins; if blank, `config/policy.yaml → ats_formatting.resume_style`; default `de`.
-- `de`: `Lebenslauf` title, sections *Persönliche Daten, Kurzprofil, Kenntnisse & Fähigkeiten, Berufserfahrung, Erfolge & Wirkung, Ausbildung & Zertifikate*, `MM/YYYY` dates, `Seite 1/2` footer, cover note wrapped as *Anschreiben* (German salutation/closing, English body).
-- `us`: classic English headings and `Mon YYYY` dates.
-- Tests assert `de` headings by default; update tests if you change section names.
+- The active and only output format is the German *Lebenslauf* (`de`) with English body content (Berlin-style standard ATS layout).
+- `Lebenslauf` title, sections *Persönliche Daten, Kurzprofil, Kenntnisse & Fähigkeiten, Berufserfahrung, Erfolge & Wirkung, Ausbildung & Zertifikate*, `MM/YYYY` dates, `Seite 1/2` footer, cover note wrapped as *Anschreiben* (German salutation/closing, English body).
+- Section headings are centralized in `src/resume/sections.py` and layout in `src/resume/layout.py`.
 
 ## 11. Tracker / database (`src/tracker/db.py`)
 
-Backend auto-selected: **Supabase REST** (`SUPABASE_URL` + `SUPABASE_KEY`) → **direct Postgres** (`DATABASE_URL`) → **in-memory SQLite** fallback (also used when credentials start with `your_`).
+Backend auto-selected: **Supabase REST** (`SUPABASE_URL` + `SUPABASE_KEY`) → **direct Postgres** (`DATABASE_URL`) → **local SQLite** (`data/tracker.db`) fallback for CLI persistence (hermetic in-memory SQLite used when `in_memory=True` or `LOCAL_DB_PATH=":memory:"`).
 Tables (`supabase_schema.sql`): `jobs`, `match_reports`, `applications` (`status`, `user_decision`, `output_directory`, `submitted_at`, `outcome`).
 Decision → status map: `apply→approved_for_manual_apply`, `applied→applied_manually` (sets `submitted_at`), `save→saved_in_queue`, `reject→rejected_by_user`. Duplicate jobs are ignored (`save_job` returns False).
 
@@ -204,7 +203,7 @@ Decision → status map: `apply→approved_for_manual_apply`, `applied→applied
 - Score looks low → check `skills`/`tools` terminology and `target_roles`; add synonyms; try lowering `MIN_MATCH_SCORE`.
 - No resume generated → score below gate; use `--force`.
 - "NEGATIVE FLAGS" is working as intended; `--force` still yields a package, flagged by validation.
-- Supabase unreachable or misconfigured → silently falls back to in-memory (data lost on exit).
+- Supabase unconfigured or offline → falls back to local SQLite at `data/tracker.db` (hermetic tests use in-memory SQLite).
 - `ingest --url` often can't read login-gated boards (Naukri/LinkedIn); paste text instead.
 - LLM output must be JSON; `_extract_json_from_text` strips markdown fences and regex-extracts `{...}`.
 

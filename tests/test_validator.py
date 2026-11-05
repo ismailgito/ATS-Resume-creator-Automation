@@ -50,3 +50,20 @@ def test_validator_catches_negative_constraint_violation(candidate, valid_tailor
     report = validator.validate(candidate, valid_tailored)
     assert report.passed is False
     assert any("Salesforce Marketing Cloud" in err for err in report.factuality_errors)
+
+
+def test_validator_catches_placeholder_in_experience_bullet(candidate, valid_tailored):
+    validator = ResumeValidator()
+    valid_tailored.experience[0].bullets.append("Managed budget of {{amount}} across channels.")
+    report = validator.validate(candidate, valid_tailored)
+    assert report.passed is False
+    assert any("Unresolved template placeholder" in err for err in report.factuality_errors)
+
+
+def test_validator_catches_dynamic_negative_constraint(candidate, valid_tailored):
+    validator = ResumeValidator()
+    candidate.negative_constraints.append("Do NOT claim HubSpot")
+    valid_tailored.skills.append("HubSpot")
+    report = validator.validate(candidate, valid_tailored)
+    assert report.passed is False
+    assert any("HubSpot" in err for err in report.factuality_errors)

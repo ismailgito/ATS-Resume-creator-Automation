@@ -41,7 +41,7 @@ class IngestionManager:
         )
 
     @classmethod
-    def from_file(cls, file_path: Path) -> List[JobRecord]:
+    def from_file(cls, file_path: Path, title: Optional[str] = None, company: Optional[str] = None) -> List[JobRecord]:
         """Ingest job(s) from a local file (JSON, Markdown, TXT, or CSV)."""
         path = Path(file_path)
         if not path.exists():
@@ -63,14 +63,15 @@ class IngestionManager:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
             cleaned = normalize_job_text(content)
-            title = path.stem.replace("-", " ").replace("_", " ").title()
+            job_title = title or path.stem.replace("-", " ").replace("_", " ").title()
+            job_company = company or "Exported Job Listing"
             return [
                 JobRecord(
                     job_id="",
                     source="file_import",
                     url=str(path),
-                    title=title,
-                    company="Exported Job Listing",
+                    title=job_title,
+                    company=job_company,
                     location="",
                     description_raw=cleaned,
                     content_hash=compute_content_hash(cleaned),
@@ -133,17 +134,11 @@ class IngestionManager:
                 charset = response.headers.get_content_charset() or "utf-8"
                 html_content = response.read().decode(charset, errors="ignore")
         except Exception as e:
-            logger.warning(f"Could not automatically fetch URL {url}: {e}")
-            return JobRecord(
-                job_id="",
-                source=source_platform,
-                url=url,
-                title="Job from URL (Review Required)",
-                company="External Employer",
-                location="",
-                description_raw=f"Job listing fetched from {url}. (Direct fetch encountered: {e}. Please paste job text if behind login).",
-                source_evidence=f"Attempted fetch from {url}",
-            )
+            logger.error(f"Could not automatically fetch URL {url}: {e}")
+            raise RuntimeError(
+                f"Could not fetch job listing from '{url}': {e}. "
+                "Please paste the job description text directly using --text instead."
+            ) from e
 
         cleaned_text = normalize_job_text(html_content)
 

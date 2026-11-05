@@ -48,7 +48,7 @@ Weights, thresholds and tool synonyms live in `config/scoring.yaml`. Weights mus
 
 ```env
 MIN_MATCH_SCORE=75        # auto-generate threshold
-RESUME_STYLE=de           # de = German Lebenslauf (default) | us = US/international
+RESUME_STYLE=de           # German Lebenslauf (standard active format)
 GEMINI_API_KEY=           # optional: LLM-powered tailoring
 OPENAI_API_KEY=           # optional
 SUPABASE_URL=             # optional: persistent tracking (run supabase_schema.sql first)
@@ -57,7 +57,7 @@ TELEGRAM_BOT_TOKEN=       # optional: run alerts
 TELEGRAM_CHAT_ID=
 ```
 
-No Supabase? It falls back to in-memory tracking automatically.
+No Supabase? It falls back to persistent local SQLite storage (data/tracker.db) automatically.
 
 ## Automate
 

@@ -31,7 +31,7 @@ class JobRecord:
             raw = f"{self.title}_{self.company}_{self.description_raw}"
             self.content_hash = hashlib.sha256(raw.encode("utf-8")).hexdigest()
         if not self.job_id:
-            raw_id = f"{self.source}_{self.url}_{self.title}_{self.company}"
+            raw_id = f"{self.source}_{self.url}_{self.title}_{self.company}_{self.content_hash[:12]}"
             self.job_id = hashlib.sha256(raw_id.encode("utf-8")).hexdigest()[:16]
 
     @classmethod
@@ -91,6 +91,7 @@ class ParsedJob:
     certifications: List[str] = field(default_factory=list)
     keywords: List[str] = field(default_factory=list)
     uncertainties: List[str] = field(default_factory=list)
+    description_raw: str = ""
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], job_id: str = "") -> ParsedJob:
@@ -111,6 +112,7 @@ class ParsedJob:
             certifications=data.get("certifications", []),
             keywords=data.get("keywords", []),
             uncertainties=data.get("uncertainties", []),
+            description_raw=data.get("description_raw", ""),
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -131,4 +133,5 @@ class ParsedJob:
             "certifications": self.certifications,
             "keywords": self.keywords,
             "uncertainties": self.uncertainties,
+            "description_raw": self.description_raw,
         }

@@ -50,19 +50,29 @@ class ApplicationTrackerDB:
         self.use_supabase_rest = is_valid_cred(self.supabase_url) and is_valid_cred(self.supabase_key)
         self.use_postgres = bool(self.database_url and ("postgres://" in self.database_url or "postgresql://" in self.database_url))
 
-        if in_memory or (not self.use_supabase_rest and not self.use_postgres):
+        self.local_db_path = settings.local_db_path
+
+        if in_memory or str(self.local_db_path) == ":memory:":
             self.backend = "memory"
-            self._init_memory_db()
+            self._init_memory_db(":memory:")
         elif self.use_supabase_rest:
             self.backend = "supabase_rest"
             self.supabase_url = self.supabase_url.rstrip("/")
         elif self.use_postgres:
             self.backend = "postgres"
             self._init_postgres_tables()
+        else:
+            self.backend = "memory"
+            self.local_db_path.parent.mkdir(parents=True, exist_ok=True)
+            self._init_memory_db(str(self.local_db_path))
 
-    def _init_memory_db(self):
-        """Initialize in-memory database for offline execution/testing."""
-        self._mem_conn = sqlite3.connect(":memory:", check_same_thread=False)
+    def _init_memory_db(self, db_path: str = ":memory:"):
+        """Initialize SQLite database for offline execution/testing.
+        
+        When db_path is ':memory:', data is ephemeral (used for hermetic tests).
+        When db_path is a file path, data persists across CLI invocations.
+        """
+        self._mem_conn = sqlite3.connect(db_path, check_same_thread=False)
         self._mem_conn.row_factory = sqlite3.Row
         cursor = self._mem_conn.cursor()
         cursor.execute(

@@ -155,6 +155,20 @@ class MatchScorer:
 
     def score(self, job: ParsedJob, candidate: CandidateProfile) -> MatchReport:
         """Score a parsed job against candidate profile facts."""
+        # Guard: reject empty or unparseable job descriptions (BUG-05)
+        if (not job.must_have_skills and not job.platforms_and_tools) or (not job.must_have_skills and not job.responsibilities):
+            return MatchReport(
+                job_id=job.job_id,
+                overall_score=0.0,
+                score_breakdown=ScoreBreakdown.empty(),
+                matched_requirements=[],
+                missing_requirements=["Job description contains no extractable skills or requirements"],
+                uncertain_requirements=[],
+                negative_constraint_flags=["Empty or unparseable job description"],
+                recommendation="reject",
+                reason="Insufficient job data to evaluate fit.",
+            )
+
         matched_reqs: List[str] = []
         missing_reqs: List[str] = []
         uncertain_reqs: List[str] = list(job.uncertainties)
@@ -567,7 +581,7 @@ class MatchScorer:
     def _check_negative_constraints(self, job: ParsedJob, candidate: CandidateProfile) -> List[str]:
         """Check whether the job strictly demands prohibited / unheld skills."""
         flags = []
-        job_full_text = f"{job.title} {' '.join(job.must_have_skills)} {' '.join(job.platforms_and_tools)} {' '.join(job.responsibilities)} {' '.join(job.keywords)}".lower()
+        job_full_text = f"{job.title} {' '.join(job.must_have_skills)} {' '.join(job.platforms_and_tools)} {' '.join(job.responsibilities)} {' '.join(job.keywords)} {job.description_raw}".lower()
 
         for constraint in candidate.negative_constraints:
             c_lower = constraint.lower()
@@ -580,6 +594,35 @@ class MatchScorer:
             if "trade desk" in c_lower and "trade desk" in job_full_text:
                 flags.append("Violates constraint: Candidate has never used The Trade Desk")
 
+            # Dynamic extraction for arbitrary prohibited tools/skills (BUG-06)
+            c_without_parens = re.sub(r"\(.*?\)", "", constraint).strip()
+            c_low = c_without_parens.lower()
+            patterns = [
+                r"do\s*not\s*claim\s+(.+)",
+                r"never\s+(?:use|used|claim|claimed|work\s+with|worked\s+with)\s+(.+)",
+                r"no\s+experience\s+(?:with|in)\s+(.+)",
+                r"not\s+proficient\s+(?:with|in)\s+(.+)",
+            ]
+            extracted = None
+            for pat in patterns:
+                m = re.search(pat, c_low)
+                if m:
+                    extracted = m.group(1).strip()
+                    break
+            if not extracted:
+                cleaned = re.sub(r"^(do\s*not\s*claim|don't\s*claim|never\s*claim|never\s*use|no)\s+", "", c_low).strip()
+                if cleaned and len(cleaned) < 50:
+                    extracted = cleaned
+
+            if extracted:
+                parts = re.split(r",|\bor\b|\band\b", extracted)
+                for part in parts:
+                    term = re.sub(r"\b(enterprise experience|experience|programmatic buying via|buying via)\b", "", part).strip()
+                    if term and term not in ["salesforce marketing cloud", "salesforce", "marketo", "dv360", "the trade desk", "trade desk"]:
+                        if not any(skip in term for skip in ["senior manager", "head of", "marketing lead", "budget", "generic", "fluent german"]):
+                            if re.search(r"(?<!\w)" + re.escape(term) + r"(?!\w)", job_full_text):
+                                flags.append(f"Violates constraint: '{constraint}' (prohibited keyword: '{term}')")
+
         if job.experience_min and job.experience_min >= 5.0 and candidate.experience_years <= 3.0:
             flags.append(f"Seniority gap: Job requires {job.experience_min}+ yrs experience; candidate has {candidate.experience_years} yrs")
 
@@ -589,4 +632,4 @@ class MatchScorer:
             if any(tok in job_full_text for tok in german_c2_tokens):
                 flags.append("Violates constraint: Job requires fluent/native German, but candidate is beginner (A1)")
 
-        return flags
+        return list(dict.fromkeys(flags))

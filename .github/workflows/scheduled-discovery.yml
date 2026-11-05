@@ -1,10 +1,9 @@
 name: Scheduled Discovery & Match Pipeline
 
-on:
+"on":
   schedule:
     # Trigger daily at 1:30 PM IST (UTC+5:30 -> 08:00 AM UTC)
     - cron: "0 8 * * *"
-  on: 
   workflow_dispatch:
     inputs:
       min_score:

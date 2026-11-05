@@ -5,3 +5,4 @@ import tempfile
 
 # Must be set before src.config is imported, because AppSettings reads it at import time.
 os.environ.setdefault("LLM_STATE_PATH", os.path.join(tempfile.mkdtemp(prefix="llm-state-"), "llm-state.json"))
+os.environ.setdefault("LOCAL_DB_PATH", ":memory:")

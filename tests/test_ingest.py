@@ -70,3 +70,18 @@ def test_ingest_from_json_file():
     assert "Performance Marketing" in job.title
     assert job.experience_min == 2
     assert job.experience_max == 4
+
+
+def test_job_id_distinct_for_different_content():
+    j1 = IngestionManager.from_text("First description with Google Ads", title="Role", company="Company")
+    j2 = IngestionManager.from_text("Second description with Meta Ads", title="Role", company="Company")
+    assert j1.job_id != j2.job_id
+
+
+def test_ingest_from_file_with_title_and_company_override(tmp_path):
+    sample_file = tmp_path / "custom_job.txt"
+    sample_file.write_text("Performance Marketer needed with Google Ads and Meta Ads.", encoding="utf-8")
+    jobs = IngestionManager.from_file(sample_file, title="Custom Title", company="Custom Company")
+    assert len(jobs) == 1
+    assert jobs[0].title == "Custom Title"
+    assert jobs[0].company == "Custom Company"

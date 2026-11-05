@@ -75,3 +75,22 @@ def test_scorer_ai_engineer_role_rejected(candidate, scorer, parser):
     assert report.overall_score < 40.0
     assert report.recommendation == "reject"
     assert any("Domain mismatch" in flag for flag in report.negative_constraint_flags)
+
+
+def test_scorer_empty_job_rejected(candidate, scorer, parser):
+    job = IngestionManager.from_text("", title="Empty Role", company="Empty Co")
+    parsed = parser.parse(job)
+    report = scorer.score(parsed, candidate)
+    assert report.overall_score == 0.0
+    assert report.recommendation == "reject"
+    assert any("Empty or unparseable" in flag for flag in report.negative_constraint_flags)
+
+
+def test_scorer_dynamic_negative_constraints(candidate, scorer, parser):
+    candidate.negative_constraints.append("Do NOT claim HubSpot")
+    jd = "Seeking a growth marketer with Google Ads and HubSpot experience."
+    job = IngestionManager.from_text(jd, title="Growth Specialist", company="Test Co")
+    parsed = parser.parse(job)
+    report = scorer.score(parsed, candidate)
+    assert report.recommendation == "reject"
+    assert any("hubspot" in flag.lower() for flag in report.negative_constraint_flags)

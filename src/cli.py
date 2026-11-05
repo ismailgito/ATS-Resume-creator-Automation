@@ -135,10 +135,14 @@ def cmd_ingest(args):
     pipeline = ResumeAutomationPipeline()
 
     if args.file:
-        jobs = IngestionManager.from_file(Path(args.file))
+        jobs = IngestionManager.from_file(Path(args.file), title=args.title, company=args.company)
     elif args.url:
-        jobs = [IngestionManager.from_url(args.url)]
-    elif args.text:
+        try:
+            jobs = [IngestionManager.from_url(args.url)]
+        except Exception as e:
+            print(f"Error fetching job from URL: {e}")
+            sys.exit(1)
+    elif args.text is not None:
         jobs = [IngestionManager.from_text(args.text, title=args.title or "Target Role", company=args.company or "Company")]
     else:
         print("Error: Specify --file, --url, or --text")

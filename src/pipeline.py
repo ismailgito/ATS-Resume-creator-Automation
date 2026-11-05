@@ -81,7 +81,7 @@ class ResumeAutomationPipeline:
         if review_pkg is not None:
             daily_limit = self.settings.daily_limit
             today_count = self.db.increment_completion(daily_limit=daily_limit)
-            if today_count >= daily_limit:
+            if today_count == daily_limit:
                 totals = self.guard.status()
                 notify_msg = (
                     f"✅ {today_count} resumes completed for today – daily limit of {daily_limit} reached "

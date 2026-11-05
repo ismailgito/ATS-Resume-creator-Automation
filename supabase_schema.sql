@@ -50,6 +50,13 @@ CREATE TABLE IF NOT EXISTS public.applications (
     outcome TEXT
 );
 
+-- 4. Daily Completion Tracker Table
+CREATE TABLE IF NOT EXISTS public.daily_completion (
+    date TEXT PRIMARY KEY,
+    count INTEGER NOT NULL DEFAULT 0,
+    limit_val INTEGER NOT NULL DEFAULT 10
+);
+
 -- Row Level Security (RLS) Policies Configuration
 ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.match_reports ENABLE ROW LEVEL SECURITY;
@@ -59,3 +66,6 @@ ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow read/write access to jobs" ON public.jobs FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow read/write access to match_reports" ON public.match_reports FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow read/write access to applications" ON public.applications FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE public.daily_completion ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read/write access to daily_completion" ON public.daily_completion FOR ALL USING (true) WITH CHECK (true);

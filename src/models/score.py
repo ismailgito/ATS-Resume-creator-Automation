@@ -16,6 +16,10 @@ class ScoreBreakdown:
     location_fit: float
     achievement_relevance: float
 
+    @classmethod
+    def empty(cls) -> ScoreBreakdown:
+        return cls(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
     def to_dict(self) -> Dict[str, float]:
         return {
             "title_role_fit": round(self.title_role_fit, 2),

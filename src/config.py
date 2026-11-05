@@ -33,38 +33,85 @@ if load_dotenv is not None:
 @dataclass
 class AppSettings:
     """Application settings loaded from environment variables."""
-    llm_provider: str = os.getenv("LLM_PROVIDER", "offline").lower()
-    gemini_api_key: Optional[str] = os.getenv("GEMINI_API_KEY")
-    gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
-    openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
-    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o")
-    anthropic_api_key: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
-    anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
-    llm_api_base_url: Optional[str] = os.getenv("LLM_API_BASE_URL")
+    llm_provider: str = field(
+        default_factory=lambda: os.getenv("LLM_PROVIDER", "offline").lower()
+    )
+    gemini_api_key: Optional[str] = field(
+        default_factory=lambda: os.getenv("GEMINI_API_KEY")
+    )
+    gemini_model: str = field(
+        default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
+    )
+    openai_api_key: Optional[str] = field(
+        default_factory=lambda: os.getenv("OPENAI_API_KEY")
+    )
+    openai_model: str = field(
+        default_factory=lambda: os.getenv("OPENAI_MODEL", "gpt-4o")
+    )
+    anthropic_api_key: Optional[str] = field(
+        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY")
+    )
+    anthropic_model: str = field(
+        default_factory=lambda: os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+    )
+    llm_api_base_url: Optional[str] = field(
+        default_factory=lambda: os.getenv("LLM_API_BASE_URL")
+    )
 
     # When a live LLM hits its usage limit, switch to offline (non-LLM) mode for the rest of
     # the day and try the LLM again the next day. State is kept in a small JSON file.
-    llm_auto_fallback: bool = os.getenv("LLM_AUTO_FALLBACK", "true").strip().lower() not in ("0", "false", "no", "off")
-    llm_state_path: Path = PROJECT_ROOT / os.getenv("LLM_STATE_PATH", "data/llm-state.json")
+    llm_auto_fallback: bool = field(
+        default_factory=lambda: os.getenv("LLM_AUTO_FALLBACK", "true").strip().lower() not in ("0", "false", "no", "off")
+    )
+    llm_state_path: Path = field(
+        default_factory=lambda: PROJECT_ROOT / os.getenv("LLM_STATE_PATH", "data/llm-state.json")
+    )
 
     # Platform credentials (to be filled later by user)
-    naukri_api_token: Optional[str] = os.getenv("NAUKRI_API_TOKEN")
-    naukri_client_id: Optional[str] = os.getenv("NAUKRI_CLIENT_ID")
-    apify_api_token: Optional[str] = os.getenv("APIFY_API_TOKEN")
+    naukri_api_token: Optional[str] = field(
+        default_factory=lambda: os.getenv("NAUKRI_API_TOKEN")
+    )
+    naukri_client_id: Optional[str] = field(
+        default_factory=lambda: os.getenv("NAUKRI_CLIENT_ID")
+    )
+    apify_api_token: Optional[str] = field(
+        default_factory=lambda: os.getenv("APIFY_API_TOKEN")
+    )
 
     # Supabase Database Configuration
-    supabase_url: Optional[str] = os.getenv("SUPABASE_URL")
-    supabase_key: Optional[str] = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_ANON_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    database_url: Optional[str] = os.getenv("DATABASE_URL")
+    supabase_url: Optional[str] = field(
+        default_factory=lambda: os.getenv("SUPABASE_URL")
+    )
+    supabase_key: Optional[str] = field(
+        default_factory=lambda: os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_ANON_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    )
+    database_url: Optional[str] = field(
+        default_factory=lambda: os.getenv("DATABASE_URL")
+    )
 
     # Paths
-    candidate_profile_path: Path = PROJECT_ROOT / os.getenv("CANDIDATE_PROFILE_PATH", "data/candidate-profile.json")
-    scoring_config_path: Path = PROJECT_ROOT / os.getenv("SCORING_CONFIG_PATH", "config/scoring.yaml")
-    policy_config_path: Path = PROJECT_ROOT / os.getenv("POLICY_CONFIG_PATH", "config/policy.yaml")
-    target_profile_path: Path = PROJECT_ROOT / "config/target-profile.yaml"
-    output_dir: Path = PROJECT_ROOT / os.getenv("OUTPUT_DIR", "outputs")
+    candidate_profile_path: Path = field(
+        default_factory=lambda: PROJECT_ROOT / os.getenv("CANDIDATE_PROFILE_PATH", "data/candidate-profile.json")
+    )
+    scoring_config_path: Path = field(
+        default_factory=lambda: PROJECT_ROOT / os.getenv("SCORING_CONFIG_PATH", "config/scoring.yaml")
+    )
+    policy_config_path: Path = field(
+        default_factory=lambda: PROJECT_ROOT / os.getenv("POLICY_CONFIG_PATH", "config/policy.yaml")
+    )
+    target_profile_path: Path = field(
+        default_factory=lambda: PROJECT_ROOT / "config/target-profile.yaml"
+    )
+    output_dir: Path = field(
+        default_factory=lambda: PROJECT_ROOT / os.getenv("OUTPUT_DIR", "outputs")
+    )
+    local_db_path: Path = field(
+        default_factory=lambda: Path(os.getenv("LOCAL_DB_PATH", str(PROJECT_ROOT / "data/tracker.db")))
+    )
 
-    min_match_score: float = float(os.getenv("MIN_MATCH_SCORE", "75.0"))
+    min_match_score: float = field(
+        default_factory=lambda: float(os.getenv("MIN_MATCH_SCORE", "75.0"))
+    )
 
     # Notification & daily limit settings
     # (read via default_factory so each AppSettings() sees the *current*
@@ -78,7 +125,9 @@ class AppSettings:
     telegram_chat_id: str = field(
         default_factory=lambda: os.getenv("TELEGRAM_CHAT_ID", "")
     )
-    daily_limit: int = int(os.getenv("DAILY_LIMIT", "10"))
+    daily_limit: int = field(
+        default_factory=lambda: int(os.getenv("DAILY_LIMIT", "10"))
+    )
 
     def has_telegram_credentials(self) -> bool:
         """Check whether a usable Telegram bot token + chat id are provided."""
